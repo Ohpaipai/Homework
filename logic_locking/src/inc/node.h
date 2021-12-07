@@ -1,11 +1,13 @@
 #pragma once
 
-#ifndef NODE_H
-#define NODE_H
+#ifndef _NODE_H
+#define _NODE_H
 
 #include<string>
 #include<iostream>
 #include<vector>
+
+#define debug
 
 #define cost(arg1,arg2) ({ \
 	int flag = 0; \
@@ -41,14 +43,56 @@ class NODE;
 class NODE{
 	public:
 		NODE(){}
-		NODE()(Type t, FType _ft, std::string _name)
-			:t(
+
+		NODE(Type _t, FType _ft, std::string _name)
+			:t(_t), ft(_ft), name(_name){
+			FI_Ary.clear();
+			FO_Ary.clear();
+			path_len = 0;
+		}
+
+		~NODE(){
+			for(auto p :FI_Ary){
+				delete p;
+			}
+			FI_Ary.clear();
+
+			for(auto p :FO_Ary){
+				delete p;
+			}
+			FO_Ary.clear();
+		}
+		
+		//operator overloading
+		bool operator ==(NODE* _A){
+			//std::cout<<"test ->" <<name<<" , "<<_A->getName()<<std::endl;
+			return name == _A->getName();
+		}
+		bool operator ==(std::string _name){
+			//std::cout<<"testB ->" <<name<<" , "<<_name<<std::endl;
+			return name == _name;
+		}
+
+
+		//operator
+		const 	int 		getCost()					{ return cost(ft, FI_Ary.size());		}
+		const 	int 		getFIlen()					{ return FI_Ary.size();					} 
+		const 	int 		getFOlen()					{ return FO_Ary.size();					}
+		const 	std::string	getName()					{ return name;							}
+			 	void		setName(std::string _name)	{ name = _name;							}
+		const 	int	 		getPathlen()				{ return path_len;						}
+		 		void	  	setPathlen(int _len)		{ path_len = _len;						}
+				void		insertFI(NODE* _node)		{ FI_Ary.push_back(_node);				}
+				void		insertFO(NODE* _node)		{ FO_Ary.push_back(_node);				}
+		const	int		 	FIfind(NODE* _node);		//return index
+		const	int		 	FOfind(NODE* _node);		//return index
 	private:
-		Type					t;
-		FType					ft;
-		std::vector<NODE*>		FI_Ary;
-		std::vector<NODE*>		FO_Ary;
-		std::string				name;
+		Type				t;
+		FType				ft;
+		std::vector<NODE*>	FI_Ary;
+		std::vector<NODE*>	FO_Ary;
+		std::string			name;
+		int		 	 		path_len;
 };
 
 #endif
