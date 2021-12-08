@@ -42,26 +42,18 @@ class NODE;
 
 class NODE{
 	public:
-		NODE(){}
+
+		NODE()
+			:t(Type::Intl), ft(FType::BUF), name(""){
+		}
+
+
 
 		NODE(Type _t, FType _ft, std::string _name)
 			:t(_t), ft(_ft), name(_name){
-			FI_Ary.clear();
-			FO_Ary.clear();
-			path_len = 0;
 		}
 
-		~NODE(){
-			for(auto p :FI_Ary){
-				delete p;
-			}
-			FI_Ary.clear();
-
-			for(auto p :FO_Ary){
-				delete p;
-			}
-			FO_Ary.clear();
-		}
+		~NODE(){}
 		
 		//operator overloading
 		bool operator ==(NODE* _A){
@@ -73,17 +65,19 @@ class NODE{
 			return name == _name;
 		}
 
-
+		
 		//operator
-		const 	int 		getCost()					{ return cost(ft, FI_Ary.size());		}
-		const 	int 		getFIlen()					{ return FI_Ary.size();					} 
-		const 	int 		getFOlen()					{ return FO_Ary.size();					}
-		const 	std::string	getName()					{ return name;							}
-			 	void		setName(std::string _name)	{ name = _name;							}
-		const 	int	 		getPathlen()				{ return path_len;						}
-		 		void	  	setPathlen(int _len)		{ path_len = _len;						}
-				void		insertFI(NODE* _node)		{ FI_Ary.push_back(_node);				}
-				void		insertFO(NODE* _node)		{ FO_Ary.push_back(_node);				}
+		const 	int 		getCost()					{ return cost(ft, FI_Ary.size());	}
+		const 	int 		getFIlen()					{ return FI_Ary.size();				} 
+		const 	int 		getFOlen()					{ return FO_Ary.size();				}
+		const 	std::string	getName()					{ return name;						}
+			 	void		setName(std::string _name)	{ name = _name;						}
+		const 	int	 		getPathlen()				{ return path_len;					}
+		 		void	  	setPathlen(int _len)		{ path_len = _len;					}
+				void		insertFI(NODE* _node)		{ FI_Ary.push_back(_node);			}
+				void		eraseFI(NODE* _node);
+				void		insertFO(NODE* _node)		{ FO_Ary.push_back(_node);			}
+				void		eraseFO(NODE* _node);
 		const	int		 	FIfind(NODE* _node);		//return index
 		const	int		 	FOfind(NODE* _node);		//return index
 	private:

@@ -1,6 +1,6 @@
 #include "./inc/node.h"
 #include "./inc/encryption.h"
-int main(){
+int main(int argc, char* argv[]){
 
 	#ifndef debug
 		FType a = FType::XNOR;
@@ -25,5 +25,8 @@ int main(){
 		std::cout<<"Index="<<ary[1]->FOfind(A)<<std::endl;
 		std::cout<<(A==ary[0])<<std::endl;
 	#endif
+		encryption* enc = new encryption();
+		enc->readfile(argv[1]);
+
 	return 0;
 }

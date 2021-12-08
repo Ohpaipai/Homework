@@ -21,3 +21,11 @@ const int NODE::FOfind(NODE* _node){
 	}
 	return return_index;
 }
+
+void NODE::eraseFI(NODE* _node){
+	FI_Ary.erase( FI_Ary.begin() + FIfind(_node) );	
+}
+
+void NODE::eraseFO(NODE* _node){
+	FO_Ary.erase( FO_Ary.begin() + FOfind(_node) );	
+}

@@ -4,7 +4,7 @@ LDFLAGS=-std=c++11 -lm -g
 #LDFLAGS=-lm -O3 
 SOURCES= ./src/node.cpp ./src/encryption.cpp ./src/main.cpp
 OBJECTS=$(SOURCES:.c=.o)
-EXECUTABLE=logic_lock
+EXECUTABLE=logic_lock.o
 INCLUDES=./src/inc/*
 
 all: $(SOURCES) bin/$(EXECUTABLE)

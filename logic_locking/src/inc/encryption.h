@@ -31,7 +31,7 @@ class encryption{
 		std::vector<NODE*>			PI_Ary;
 		std::vector<NODE*>			PO_Ary;
 		std::vector<NODE*>			KEY_Ary;
-		std::map<std::string, NODE*>	name2index;
+		std::map<std::string, NODE*>	name2node;
 		std::string 			 	key;
 		int 					 	area;
 };
