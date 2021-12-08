@@ -5,13 +5,16 @@
 
 #include"./node.h"
 #include<iostream>
+#include<sstream>
+#include<fstream>
+#include<map>
 
-class ENCRYPTION;
+class encryption;
 
-class ENCRYPTION{
+class encryption{
 	public:
-		ENCRYPTION(){}
-		~ENCRYPTION(){}
+		encryption();
+		~encryption();
 		
 		//operator
 		const	int			getArea()				{ return area; 					}
@@ -21,13 +24,16 @@ class ENCRYPTION{
 				void		insertPI(NODE *_node)	{ PI_Ary.push_back(_node);		}
 				void		insertPO(NODE *_node)	{ PO_Ary.push_back(_node);		}
 				void		insertKey(NODE *_node)	{ KEY_Ary.push_back(_node);		}
+				void		readfile(std::string);				//read .bench file
+				void		witefile();				//write .bench file with encryption
 	private:
-		std::vector<NODE*>	NODE_Ary;
-		std::vector<NODE*>	PI_Ary;
-		std::vector<NODE*>	PO_Ary;
-		std::vector<NODE*>	KEY_Ary;
-		std::string 		key;
-		int 				area;
+		std::vector<NODE*>			NODE_Ary;
+		std::vector<NODE*>			PI_Ary;
+		std::vector<NODE*>			PO_Ary;
+		std::vector<NODE*>			KEY_Ary;
+		std::map<std::string, NODE*>	name2index;
+		std::string 			 	key;
+		int 					 	area;
 };
 
 #endif
