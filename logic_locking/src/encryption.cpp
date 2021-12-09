@@ -16,7 +16,7 @@ void encryption::readfile(std::string _filename){
 	while(std::getline(input, buffer)){
 		std::string checkerflag = "";
 		checkerflag.assign(buffer, 0, 2);
-		std::cout<<checkerflag<<std::endl;	
+		//std::cout<<checkerflag<<std::endl;	
 		//annotation
 		if(buffer[0]=='#')
 			continue;
@@ -62,7 +62,7 @@ void encryption::readfile(std::string _filename){
 			name2node[name] = n;
 		}
 		else{
-			std::cout<<buffer<<std::endl;
+		//	std::cout<<buffer<<std::endl;
 			Type t =Type::Intl; //set type 
 			FType ft;
 			
@@ -73,19 +73,21 @@ void encryption::readfile(std::string _filename){
 			//name
 			std::string name = "";
 			ss >> name;
-			std::cout<<name<<std::endl;
+		//	std::cout<<name<<std::endl;
 			// = kill
 			ss >> tem_buf;
-			std::cout<<tem_buf<<std::endl;
+		//	std::cout<<tem_buf<<std::endl;
 			tem_buf.clear();
 			
 
 			//get Ftype
 			ss >> tem_buf;
-			std::cout<<tem_buf<<std::endl;
+		//	std::cout<<tem_buf<<std::endl;
 			std::string ft_name = "";
 			ft_name.assign(tem_buf, 0, 3);
-			std::cout<<ft_name<<std::end;
+
+			std::transform(ft_name.begin(), ft_name.end(), ft_name.begin(), tolower);
+		//	std::cout<<ft_name<<std::end;
 			if(ft_name == "not"){
 				ft = FType::NOT;
 				tem_buf.assign(tem_buf, 4, tem_buf.size() - 4 );
