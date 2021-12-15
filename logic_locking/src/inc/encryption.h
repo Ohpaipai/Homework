@@ -10,6 +10,8 @@
 #include<map>
 #include<cctype>
 #include<algorithm>
+#include<stdio.h>
+#include<cstring>
 
 class encryption;
 
@@ -37,7 +39,9 @@ class encryption{
 		std::map<std::string, NODE*>	name2node;
 		std::string 			 	key;
 		int 					 	area;
+		int*						color;
 		void						caculateArea();
+		void						DFS(int,int&);
 };
 
 #endif

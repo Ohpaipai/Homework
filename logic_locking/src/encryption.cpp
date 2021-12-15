@@ -188,7 +188,26 @@ void encryption::caculateArea(){
 	}
 }
 
+void encryption::DFS(int _id, int &_time){
+	color[_id] = 2; //gray
+	NODE_Ary[_id]->setStart(++_time);
+	
+	for(auto p : NODE_Ary[_id]->getFO()){
+		if(color[p->getId()] == 0){
+			DFS(p->getId(), _time);	
+		}
+	}
+	color[_id] = 1;//black
+	NODE_Ary[_id]->setEnd(++_time);
+}
+
 
 void encryption::topological_sort(){
-
+	color = new int[NODE_Ary.size()];
+	memset(color, 0, NODE_Ary.size()); //reset 0-> white , 1-> black , 2->gray
+	int time = 0;
+	for(auto p : NODE_Ary){
+		DFS(p->getId() , time);
+	}
+	delete [] color;
 }

@@ -90,6 +90,8 @@ class NODE{
 				void		setEnd(int _num)			{ end = _num; 						}
 		const 	int			getId()						{ return id;						}
 				void		setId(int _num)				{ id = _num; 						}
+		std::vector<NODE*>& getFI()						{ return FI_Ary;					}	
+		std::vector<NODE*>& getFO()						{ return FO_Ary;					}	
 	private:
 		Type				t;
 		FType				ft;

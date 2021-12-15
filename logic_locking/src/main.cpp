@@ -3,6 +3,7 @@
 int main(int argc, char* argv[]){
 
 	#ifndef debug
+		std::cout<<"debug\n";	
 		FType a = FType::XNOR;
 		FType b = FType::XOR;
 		FType c = FType::NOR;
@@ -25,6 +26,8 @@ int main(int argc, char* argv[]){
 		std::cout<<"Index="<<ary[1]->FOfind(A)<<std::endl;
 		std::cout<<(A==ary[0])<<std::endl;
 	#endif
+	
+
 		encryption* enc = new encryption();
 		enc->readfile(argv[1]);
 
