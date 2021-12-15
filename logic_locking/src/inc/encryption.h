@@ -28,6 +28,7 @@ class encryption{
 				void		insertKey(NODE *_node)	{ KEY_Ary.push_back(_node);		}
 				void		readfile(std::string);				//read .bench file
 				void		witefile();				//write .bench file with encryption
+				void		topological_sort();		// pre-process for logic cone
 	private:
 		std::vector<NODE*>			NODE_Ary;
 		std::vector<NODE*>			PI_Ary;
@@ -36,6 +37,7 @@ class encryption{
 		std::map<std::string, NODE*>	name2node;
 		std::string 			 	key;
 		int 					 	area;
+		void						caculateArea();
 };
 
 #endif

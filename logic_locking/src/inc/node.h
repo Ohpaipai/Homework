@@ -44,13 +44,13 @@ class NODE{
 	public:
 
 		NODE()
-			:t(Type::Intl), ft(FType::BUF), name(""){
+			:t(Type::Intl), ft(FType::BUF), name(""), path_len(0), and_counter(0), or_counter(0), start(0), end(0), id(0){
 		}
 
 
 
 		NODE(Type _t, FType _ft, std::string _name)
-			:t(_t), ft(_ft), name(_name){
+			:t(_t), ft(_ft), name(_name), path_len(0), and_counter(0), or_counter(0), start(0), end(0), id(0){
 		}
 
 		~NODE(){}
@@ -80,6 +80,16 @@ class NODE{
 				void		eraseFO(NODE* _node);
 		const	int		 	FIfind(NODE* _node);		//return index
 		const	int		 	FOfind(NODE* _node);		//return index
+		const 	int			getAndC()					{ return and_counter;				}
+		const 	int			getOrC()					{ return or_counter;				}
+				void		setAnd_count(int _num)		{ and_counter = _num; 				}
+				void		setOr_count(int _num)		{ or_counter = _num; 				}
+		const 	int			getStart()					{ return start;						}
+		const 	int			getEnd()					{ return end;						}
+				void		setStart(int _num)			{ start = _num; 					}
+				void		setEnd(int _num)			{ end = _num; 						}
+		const 	int			getId()						{ return id;						}
+				void		setId(int _num)				{ id = _num; 						}
 	private:
 		Type				t;
 		FType				ft;
@@ -87,6 +97,11 @@ class NODE{
 		std::vector<NODE*>	FO_Ary;
 		std::string			name;
 		int		 	 		path_len;
+		int					and_counter; 
+		int					or_counter;
+		int 				id;
+		int					start;
+		int					end;
 };
 
 #endif

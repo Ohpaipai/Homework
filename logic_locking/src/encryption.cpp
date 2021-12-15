@@ -4,6 +4,10 @@ encryption::encryption(){
 }
 
 encryption::~encryption(){
+	for(auto p : NODE_Ary ){
+		delete p;
+	}
+	NODE_Ary.clear();
 }
 
 
@@ -12,7 +16,8 @@ void encryption::readfile(std::string _filename){
 	input.open(_filename,std::ios::in);
 	
 	std::string buffer;
-	
+
+	int coun = 0;
 	while(std::getline(input, buffer)){
 		std::string checkerflag = "";
 		checkerflag.assign(buffer, 0, 2);
@@ -35,7 +40,7 @@ void encryption::readfile(std::string _filename){
 		// 	std::cout<<n->getName()<<" "<<n->getCost()<<std::endl;
 			
 			n->setPathlen(0); //if pathlen equal to -1 mean is output
-	
+			n->setId(coun++); //set ID	
 			//push in
 			NODE_Ary.push_back(n);
 			PI_Ary.push_back(n);
@@ -53,7 +58,9 @@ void encryption::readfile(std::string _filename){
 			Type	t  = Type::PO;
 			FType	ft = FType::BUF;
 			NODE *n =new NODE(t, ft, name);
+			
 			n->setPathlen(-1); //if pathlen equal to -1 mean is output
+			n->setId(coun++); //set ID	
 			
 			//push in
 			NODE_Ary.push_back(n);
@@ -126,6 +133,7 @@ void encryption::readfile(std::string _filename){
 
 			//creat node & push
 			NODE* n =new NODE(t, ft, name);
+			n->setId(coun++); //set ID	
 			NODE_Ary.push_back(n);
 			name2node[name] = n; 
 
@@ -167,4 +175,20 @@ void encryption::readfile(std::string _filename){
 		buffer.clear();
 	}
 	input.close();
+
+	//caculate area
+	this->caculateArea();
+}
+
+
+void encryption::caculateArea(){
+	area = 0; //reset
+	for(auto p : NODE_Ary){
+		area += p->getCost();  
+	}
+}
+
+
+void encryption::topological_sort(){
+
 }
