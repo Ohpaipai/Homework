@@ -1,6 +1,14 @@
 #include "./inc/encryption.h"
+//#define bug
 
 encryption::encryption(){
+	NODE_Ary.clear();
+	PI_Ary.clear();
+	PO_Ary.clear();
+	KEY_Ary.clear();
+	name2node.clear();
+	key="";
+	area = 0;
 }
 
 encryption::~encryption(){
@@ -8,6 +16,12 @@ encryption::~encryption(){
 		delete p;
 	}
 	NODE_Ary.clear();
+	PI_Ary.clear();
+	PO_Ary.clear();
+	KEY_Ary.clear();
+	name2node.clear();
+	key="";
+	area = 0;
 }
 
 
@@ -32,22 +46,24 @@ void encryption::readfile(std::string _filename){
 				
 			Type	t  = Type::PI;
 			FType	ft = FType::BUF;
-			NODE *n = new NODE(t, ft, name);
 			
-			if(n == NULL)
-				std::cout<<"error\n";
-		
+			NODE *n;
+			auto it = name2node.find(name);
+			if(it == name2node.end() ){
+				n =new NODE(t, ft, name);
+				n->setId(coun++); //set ID	
+				NODE_Ary.push_back(n);
+				name2node[name] = n; 
+			}
+			else{
+				n = it->second;
+				n->setFtype(ft);
+				n->setType(t);
+			}
 		// 	std::cout<<n->getName()<<" "<<n->getCost()<<std::endl;
-			
-			n->setPathlen(0); //if pathlen equal to -1 mean is output
-			n->setId(coun++); //set ID	
-			//push in
-			NODE_Ary.push_back(n);
+			//Input push in
 			PI_Ary.push_back(n);
 
-
-			//make find graph
-			name2node[name] = n;
 
 		}
 		else if(checkerflag == "OU"){
@@ -57,16 +73,22 @@ void encryption::readfile(std::string _filename){
 
 			Type	t  = Type::PO;
 			FType	ft = FType::BUF;
-			NODE *n =new NODE(t, ft, name);
 			
-			n->setPathlen(-1); //if pathlen equal to -1 mean is output
-			n->setId(coun++); //set ID	
-			
+			NODE *n;
+			auto it = name2node.find(name);
+			if(it == name2node.end() ){
+				n =new NODE(t, ft, name);
+				n->setId(coun++); //set ID	
+				NODE_Ary.push_back(n);
+				name2node[name] = n; 
+			}
+			else{
+				n = it->second;
+				n->setFtype(ft);
+				n->setType(t);
+			}
 			//push in
-			NODE_Ary.push_back(n);
 			PO_Ary.push_back(n);	
-			//make find graph
-			name2node[name] = n;
 		}
 		else{
 		//	std::cout<<buffer<<std::endl;
@@ -132,13 +154,23 @@ void encryption::readfile(std::string _filename){
 			}
 
 			//creat node & push
-			NODE* n =new NODE(t, ft, name);
-			n->setId(coun++); //set ID	
-			NODE_Ary.push_back(n);
-			name2node[name] = n; 
+			auto it = name2node.find(name);
+			NODE *n;
+			if(it == name2node.end() ){
+				n =new NODE(t, ft, name);
+				n->setId(coun++); //set ID	
+				NODE_Ary.push_back(n);
+				name2node[name] = n; 
+			}
+			else{
+				n = it->second;
+				n->setFtype(ft);
+			}
 
-			//first node push
+			//erase unuse char
 			if(tem_buf[0] == '(')
+				tem_buf.erase(tem_buf.begin());
+			if(tem_buf[0] == ',')
 				tem_buf.erase(tem_buf.begin());
 			if(tem_buf[tem_buf.size()-1] == ',')
 				tem_buf.pop_back();
@@ -147,15 +179,40 @@ void encryption::readfile(std::string _filename){
 		
 			std::cout<<"insert node ( "<<name<<" ) = ";
 			std::cout<<tem_buf<<" ";
-				
-			NODE *tem_n = name2node[tem_buf];
-			//fan out
-			tem_n->insertFO(n);
-			//fan in
-			n->insertFI(tem_n);
+			
+
+			it = name2node.find(tem_buf);
+			if(it == name2node.end() ){
+				NODE *tem_n;
+				tem_n =new NODE(t, FType::BUF, tem_buf);
+				tem_n->setId(coun++); //set ID	
+				NODE_Ary.push_back(tem_n);
+				name2node[tem_buf] = tem_n; 
+				//fan out
+				tem_n->insertFO(n);
+				//fan in
+				n->insertFI(tem_n);
+			}
+			else{
+				NODE *tem_n;
+				tem_n = it->second;
+				//fan out
+				tem_n->insertFO(n);
+				//fan in
+				n->insertFI(tem_n);
+			}
+
+			
+			//delete [] tem_n;
+
+			//clear
+			tem_buf.clear();
+			tem_buf="";
 
 			while(ss >> tem_buf){
 				if(tem_buf[0] == '(')
+					tem_buf.erase(tem_buf.begin());
+				if(tem_buf[0] == ',')
 					tem_buf.erase(tem_buf.begin());
 				if(tem_buf[tem_buf.size()-1] == ',')
 					tem_buf.pop_back();
@@ -163,11 +220,22 @@ void encryption::readfile(std::string _filename){
 					tem_buf.pop_back();
 			
 				std::cout<<tem_buf<<" ";
-				tem_n = name2node[tem_buf];
+				NODE *tem_n;	
+				it = name2node.find(tem_buf);
+				if(it == name2node.end() ){
+					tem_n =new NODE(t, FType::BUF, tem_buf);
+					tem_n->setId(coun++); //set ID	
+					NODE_Ary.push_back(tem_n);
+					name2node[tem_buf] = tem_n; 
+				}
+				else{
+					tem_n = it->second;
+				}
 				//fan ou
 				tem_n->insertFO(n);
 				//fan in
 				n->insertFI(tem_n);
+			//	delete [] tem_n;
 			}
 
 			std::cout<<std::endl;
@@ -178,8 +246,33 @@ void encryption::readfile(std::string _filename){
 
 	//caculate area
 	this->caculateArea();
+
+	#ifdef bug
+		std::cout<<"#node: "<<NODE_Ary.size()<<std::endl;
+		for(auto p : NODE_Ary){
+			std::cout<<"-------------------------------------------------------\n";
+			std::cout<<"name: "<<p->getName()<<std::endl;
+			std::cout<<"Gate type: "<<p->getFtype()<<std::endl;
+			std::cout<<"Type: "<<p->getType()<<std::endl;
+			std::cout<<"ID: "<<p->getId()<<std::endl;
+			std::cout<<"FI node : ";
+			for(auto q :p->getFI()){
+				std::cout<<q->getName()<<" ";
+			}
+			std::cout<<"\nFO node : ";
+			for(auto q :p->getFO()){
+				std::cout<<q->getName()<<" ";
+			}
+			std::cout<<"\n-------------------------------------------------------\n";
+		}
+		std::cout<<"area: "<<area<<std::endl;
+	#endif
+
 }
 
+bool compareNode(NODE *_node1, NODE *_node2 ){
+	return _node1->getEnd() > _node2->getEnd();
+}
 
 void encryption::caculateArea(){
 	area = 0; //reset
@@ -188,26 +281,54 @@ void encryption::caculateArea(){
 	}
 }
 
-void encryption::DFS(int _id, int &_time){
+void encryption::DFS(int _id, int* _time){
+//	std::cout<<*_time<<std::endl;
+
 	color[_id] = 2; //gray
-	NODE_Ary[_id]->setStart(++_time);
-	
+	NODE_Ary[_id]->setStart((*_time)++);	
 	for(auto p : NODE_Ary[_id]->getFO()){
 		if(color[p->getId()] == 0){
 			DFS(p->getId(), _time);	
 		}
 	}
+//	std::cout<<*_time<<std::endl;
 	color[_id] = 1;//black
-	NODE_Ary[_id]->setEnd(++_time);
+	NODE_Ary[_id]->setEnd((*_time)++);
+
 }
 
 
 void encryption::topological_sort(){
 	color = new int[NODE_Ary.size()];
-	memset(color, 0, NODE_Ary.size()); //reset 0-> white , 1-> black , 2->gray
+
+	memset(color, 0, NODE_Ary.size()*sizeof(color)); //reset 0-> white , 1-> black , 2->gray
+
 	int time = 0;
+	
+//	for(size_t i=0;i<NODE_Ary.size();i++)
+//		std::cout<<color[i]<<std::endl;
+
 	for(auto p : NODE_Ary){
-		DFS(p->getId() , time);
+		if(color[p->getId()]==0){
+			DFS(p->getId() , &time);
+		}
 	}
+	
+//	for(size_t i=0;i<NODE_Ary.size();i++)
+//		std::cout<<color[i]<<std::endl;
+
 	delete [] color;
+
+	//copy
+
+	std::sort(NODE_Ary.begin(), NODE_Ary.end(), compareNode); //sory by finifsh time
+
+	int count = 0;
+	#ifdef bug
+	for(auto p :NODE_Ary){
+		//std::cout<<p<<std::endl;
+		p->setId(count++); //set ID
+		std::cout<<p->getId()<<"->"<<p->getName()<<"("<<p->getStart()<<","<<p->getEnd()<<")"<<"\n";
+	}
+	#endif
 }

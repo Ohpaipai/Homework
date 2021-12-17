@@ -6,6 +6,8 @@
 #include<string>
 #include<iostream>
 #include<vector>
+#include<cstdint>
+#include<set>
 
 #define debug
 
@@ -27,7 +29,9 @@ enum class Type{
 	PO
 };
 
-enum class FType {
+std::ostream& operator<<(std::ostream& os, Type _t);
+
+enum class FType{
 	AND, 
 	OR, 
 	NOR, 
@@ -37,6 +41,9 @@ enum class FType {
 	XOR, 
 	XNOR
 };
+
+std::ostream& operator<<(std::ostream& os, FType _ft);
+
 
 class NODE;
 
@@ -53,8 +60,16 @@ class NODE{
 			:t(_t), ft(_ft), name(_name), path_len(0), and_counter(0), or_counter(0), start(0), end(0), id(0){
 		}
 
-		~NODE(){}
+		~NODE(){
+			FI_Ary.clear();
+			FO_Ary.clear();
+		}
 		
+		NODE* operator=(NODE* _n){
+			NODE *tem_n;
+			tem_n = _n;
+			return tem_n;
+		}
 		//operator overloading
 		bool operator ==(NODE* _A){
 			//std::cout<<"test ->" <<name<<" , "<<_A->getName()<<std::endl;
@@ -70,6 +85,10 @@ class NODE{
 		const 	int 		getCost()					{ return cost(ft, FI_Ary.size());	}
 		const 	int 		getFIlen()					{ return FI_Ary.size();				} 
 		const 	int 		getFOlen()					{ return FO_Ary.size();				}
+				void		setFtype(FType _ft)			{ ft = _ft;							}
+				void		setType(Type _t)			{ t = _t; 							}
+		const 	FType		getFtype()					{ return ft;						}
+		const 	Type		getType()					{ return t;							}
 		const 	std::string	getName()					{ return name;						}
 			 	void		setName(std::string _name)	{ name = _name;						}
 		const 	int	 		getPathlen()				{ return path_len;					}
@@ -92,6 +111,7 @@ class NODE{
 				void		setId(int _num)				{ id = _num; 						}
 		std::vector<NODE*>& getFI()						{ return FI_Ary;					}	
 		std::vector<NODE*>& getFO()						{ return FO_Ary;					}	
+				void		ANDLogicCone();			
 	private:
 		Type				t;
 		FType				ft;
@@ -104,6 +124,8 @@ class NODE{
 		int 				id;
 		int					start;
 		int					end;
+		std::vector<std::set<NODE*>> AndCone;
+		std::vector<std::set<NODE*>> OrCone;
 };
 
 #endif

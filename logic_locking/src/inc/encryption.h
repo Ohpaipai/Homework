@@ -13,13 +13,16 @@
 #include<stdio.h>
 #include<cstring>
 
+//#define bug
 class encryption;
+
+bool compareNode(NODE *_node1, NODE *_node2 );
 
 class encryption{
 	public:
 		encryption();
 		~encryption();
-		
+			
 		//operator
 		const	int			getArea()				{ return area; 					}
 		const 	std::string	getKey()				{ return key;					}
@@ -41,7 +44,7 @@ class encryption{
 		int 					 	area;
 		int*						color;
 		void						caculateArea();
-		void						DFS(int,int&);
+		void						DFS(int,int*);
 };
 
 #endif

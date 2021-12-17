@@ -1,4 +1,4 @@
-#include "./inc/node.h"
+//#include "./inc/node.h"
 #include "./inc/encryption.h"
 int main(int argc, char* argv[]){
 
@@ -30,6 +30,6 @@ int main(int argc, char* argv[]){
 
 		encryption* enc = new encryption();
 		enc->readfile(argv[1]);
-
+		enc->topological_sort();
 	return 0;
 }

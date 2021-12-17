@@ -1,5 +1,34 @@
 #include"./inc/node.h"
 
+std::ostream& operator<<(std::ostream& os, Type _t)
+{
+    switch(_t)
+    {
+		case Type::Intl		: os << "Intl";   break;
+		case Type::PI 		: os << "PI"; 	  break;
+		case Type::PO 		: os << "PO";  	  break;
+        default    			: os.setstate(std::ios_base::failbit);
+    }
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, FType _ft)
+{
+    switch(_ft)
+    {
+		case FType::AND   	: os << "AND";  	  break;
+		case FType::OR 		: os << "OR"; 		  break;
+		case FType::NOR 	: os << "NOR"; 	 	  break;
+		case FType::NAND 	: os << "NAND";  	  break;
+		case FType::NOT 	: os << "NOT"; 	 	  break;
+		case FType::XNOR 	: os << "XNOR"; 	  break;
+		case FType::XOR 	: os << "XOR";  	  break;
+		case FType::BUF 	: os << "BUF";  	  break;
+        default    			: os.setstate(std::ios_base::failbit);
+    }
+    return os;
+}
+
 const int NODE::FIfind(NODE* _node){
 	int return_index = -1;
 	for(auto p : FI_Ary){
