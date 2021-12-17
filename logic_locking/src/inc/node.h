@@ -101,8 +101,8 @@ class NODE{
 		const	int		 	FOfind(NODE* _node);		//return index
 		const 	int			getAndC()					{ return and_counter;				}
 		const 	int			getOrC()					{ return or_counter;				}
-				void		setAnd_count(int _num)		{ and_counter = _num; 				}
-				void		setOr_count(int _num)		{ or_counter = _num; 				}
+				void		setAndC(int _num)			{ and_counter = _num; 				}
+				void		setOrC(int _num)			{ or_counter = _num; 				}
 		const 	int			getStart()					{ return start;						}
 		const 	int			getEnd()					{ return end;						}
 				void		setStart(int _num)			{ start = _num; 					}
@@ -124,8 +124,6 @@ class NODE{
 		int 				id;
 		int					start;
 		int					end;
-		std::vector<std::set<NODE*>> AndCone;
-		std::vector<std::set<NODE*>> OrCone;
 };
 
 #endif

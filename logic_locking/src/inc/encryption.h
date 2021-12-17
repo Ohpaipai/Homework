@@ -13,7 +13,7 @@
 #include<stdio.h>
 #include<cstring>
 
-//#define bug
+#define bug
 class encryption;
 
 bool compareNode(NODE *_node1, NODE *_node2 );
@@ -34,6 +34,8 @@ class encryption{
 				void		readfile(std::string);				//read .bench file
 				void		witefile();				//write .bench file with encryption
 				void		topological_sort();		// pre-process for logic cone
+				void		F_And_logic_cone();
+				void		F_Or_logic_cone();
 	private:
 		std::vector<NODE*>			NODE_Ary;
 		std::vector<NODE*>			PI_Ary;
@@ -41,10 +43,13 @@ class encryption{
 		std::vector<NODE*>			KEY_Ary;
 		std::map<std::string, NODE*>	name2node;
 		std::string 			 	key;
+		std::vector<std::set<NODE*>> AndCone;
+		std::vector<std::set<NODE*>> OrCone;
 		int 					 	area;
 		int*						color;
 		void						caculateArea();
 		void						DFS(int,int*);
+		void 						RecursiveFtype(NODE* _node, int& max, FType _ft);
 };
 
 #endif

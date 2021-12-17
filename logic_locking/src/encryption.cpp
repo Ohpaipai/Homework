@@ -60,7 +60,6 @@ void encryption::readfile(std::string _filename){
 				n->setFtype(ft);
 				n->setType(t);
 			}
-		// 	std::cout<<n->getName()<<" "<<n->getCost()<<std::endl;
 			//Input push in
 			PI_Ary.push_back(n);
 
@@ -247,26 +246,6 @@ void encryption::readfile(std::string _filename){
 	//caculate area
 	this->caculateArea();
 
-	#ifdef bug
-		std::cout<<"#node: "<<NODE_Ary.size()<<std::endl;
-		for(auto p : NODE_Ary){
-			std::cout<<"-------------------------------------------------------\n";
-			std::cout<<"name: "<<p->getName()<<std::endl;
-			std::cout<<"Gate type: "<<p->getFtype()<<std::endl;
-			std::cout<<"Type: "<<p->getType()<<std::endl;
-			std::cout<<"ID: "<<p->getId()<<std::endl;
-			std::cout<<"FI node : ";
-			for(auto q :p->getFI()){
-				std::cout<<q->getName()<<" ";
-			}
-			std::cout<<"\nFO node : ";
-			for(auto q :p->getFO()){
-				std::cout<<q->getName()<<" ";
-			}
-			std::cout<<"\n-------------------------------------------------------\n";
-		}
-		std::cout<<"area: "<<area<<std::endl;
-	#endif
 
 }
 
@@ -324,11 +303,87 @@ void encryption::topological_sort(){
 	std::sort(NODE_Ary.begin(), NODE_Ary.end(), compareNode); //sory by finifsh time
 
 	int count = 0;
-	#ifdef bug
 	for(auto p :NODE_Ary){
-		//std::cout<<p<<std::endl;
+		//reset id
 		p->setId(count++); //set ID
-		std::cout<<p->getId()<<"->"<<p->getName()<<"("<<p->getStart()<<","<<p->getEnd()<<")"<<"\n";
+		
+		//and count 
+		if(p->getFI().size()==0){
+			p->setAndC(0);
+			p->setOrC(0);
+		}
+		else{
+			if(p->getFtype() == FType::AND){
+				int max_and = 0;
+				RecursiveFtype(p, max_and, FType::AND);
+				//set ANDC
+				p->setAndC(max_and+1);
+			}
+			else if(p->getFtype() == FType::OR){
+				int max_or = 0;
+				RecursiveFtype(p, max_or, FType::OR);
+				//set ANDC
+				p->setAndC(max_or+1);
+			}
+			else{
+				p->setAndC(0);
+				p->setOrC(0);
+			}
+			
+		}
+		//or count
+		//std::cout<<p->getId()<<"->"<<p->getName()<<"("<<p->getStart()<<","<<p->getEnd()<<")"<<"\n";
 	}
+	
+#ifdef bug
+		std::cout<<"#node: "<<NODE_Ary.size()<<std::endl;
+		for(auto p : NODE_Ary){
+			std::cout<<"-------------------------------------------------------\n";
+			std::cout<<"name: "<<p->getName()<<std::endl;
+			std::cout<<"Gate type: "<<p->getFtype()<<std::endl;
+			std::cout<<"Type: "<<p->getType()<<std::endl;
+			std::cout<<"ID: "<<p->getId()<<std::endl;
+			std::cout<<"And Count: "<<p->getAndC()<<std::endl;
+			std::cout<<"Or Count: "<<p->getOrC()<<std::endl;
+
+			std::cout<<"FI node : ";
+			for(auto q :p->getFI()){
+				std::cout<<q->getName()<<" ";
+			}
+			std::cout<<"\nFO node : ";
+			for(auto q :p->getFO()){
+				std::cout<<q->getName()<<" ";
+			}
+			std::cout<<"\n-------------------------------------------------------\n";
+		}
+		std::cout<<"area: "<<area<<std::endl;
 	#endif
+}
+
+void encryption::RecursiveFtype(NODE* _node, int& max,FType _ft){
+	for(auto p : _node->getFI()){
+		if(p->getFtype() == _ft){
+			switch(_ft)
+			{
+				case FType::OR :
+					if(p->getOrC() > max)
+						max = p->getOrC();
+					break;
+				case FType::AND :
+					if(p->getAndC() > max)
+						max = p->getAndC();
+					break;
+				default :
+					break;
+			}
+		}
+		else if(p->getFtype() == FType::BUF){
+			this->RecursiveFtype(p, max, _ft);
+		}
+	}
+
+}
+
+void encryption::F_And_logic_cone(){
+	
 }
