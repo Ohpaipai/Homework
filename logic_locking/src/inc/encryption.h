@@ -34,22 +34,22 @@ class encryption{
 				void		readfile(std::string);				//read .bench file
 				void		witefile();				//write .bench file with encryption
 				void		topological_sort();		// pre-process for logic cone
-				void		F_And_logic_cone();
-				void		F_Or_logic_cone();
+				void		Flogic_cone();
 	private:
-		std::vector<NODE*>			NODE_Ary;
-		std::vector<NODE*>			PI_Ary;
-		std::vector<NODE*>			PO_Ary;
-		std::vector<NODE*>			KEY_Ary;
+		std::vector<NODE*>				NODE_Ary;
+		std::vector<NODE*>				PI_Ary;
+		std::vector<NODE*>				PO_Ary;
+		std::vector<NODE*>				KEY_Ary;
 		std::map<std::string, NODE*>	name2node;
-		std::string 			 	key;
-		std::vector<std::set<NODE*>> AndCone;
-		std::vector<std::set<NODE*>> OrCone;
-		int 					 	area;
-		int*						color;
-		void						caculateArea();
-		void						DFS(int,int*);
-		void 						RecursiveFtype(NODE* _node, int& max, FType _ft);
+		std::string 			 		key;
+		std::vector<std::set<NODE*>> 	AndCone;
+		std::vector<std::set<NODE*>> 	OrCone;
+		int 					 		area;
+		int*							color;
+		void							caculateArea();
+		void							DFS(int,int*);
+		void 							RecursiveFtype(NODE* _node, int& max, FType _ft);
+		void  							RecursiveLogicCone(std::set<NODE*>&, NODE*, FType);
 };
 
 #endif

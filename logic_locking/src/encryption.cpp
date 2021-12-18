@@ -292,12 +292,7 @@ void encryption::topological_sort(){
 			DFS(p->getId() , &time);
 		}
 	}
-	
-//	for(size_t i=0;i<NODE_Ary.size();i++)
-//		std::cout<<color[i]<<std::endl;
-
 	delete [] color;
-
 	//copy
 
 	std::sort(NODE_Ary.begin(), NODE_Ary.end(), compareNode); //sory by finifsh time
@@ -307,7 +302,7 @@ void encryption::topological_sort(){
 		//reset id
 		p->setId(count++); //set ID
 		
-		//and count 
+		//count and num
 		if(p->getFI().size()==0){
 			p->setAndC(0);
 			p->setOrC(0);
@@ -335,7 +330,7 @@ void encryption::topological_sort(){
 		//std::cout<<p->getId()<<"->"<<p->getName()<<"("<<p->getStart()<<","<<p->getEnd()<<")"<<"\n";
 	}
 	
-#ifdef bug
+	#ifdef bug
 		std::cout<<"#node: "<<NODE_Ary.size()<<std::endl;
 		for(auto p : NODE_Ary){
 			std::cout<<"-------------------------------------------------------\n";
@@ -381,9 +376,31 @@ void encryption::RecursiveFtype(NODE* _node, int& max,FType _ft){
 			this->RecursiveFtype(p, max, _ft);
 		}
 	}
+	return;
 
 }
-
-void encryption::F_And_logic_cone(){
+void  encryption::RecursiveLogicCone(std::set<NODE*>& _s,NODE* _node, FType _ft){
 	
+	if(_ft == FType::AND){ //AND
+		for(auto p :_node->getFO()){
+				
+		}
+	}
+	else{ //OR
+	}
+	return;
+}
+
+void encryption::Flogic_cone(){
+	
+	color = new int[NODE_Ary.size()];
+	memset(color, 0, NODE_Ary.size()*sizeof(color)); //reset 0-> white , 1-> black 
+	for(auto p: NODE_Ary){
+		if(color[p->getId()] == 0 && (p->getFtype()== FType::AND || p->getFtype() == FType::OR))){
+			color[p->getId()] = 1;
+			std::set<NODE*>S;
+			S.clear();
+			RecursiveLogicCone(S, p, p->getFtype());
+		}
+	}
 }
