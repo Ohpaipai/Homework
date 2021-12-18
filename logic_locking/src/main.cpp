@@ -31,5 +31,6 @@ int main(int argc, char* argv[]){
 		encryption* enc = new encryption();
 		enc->readfile(argv[1]);
 		enc->topological_sort();
+		enc->Flogic_cone();
 	return 0;
 }

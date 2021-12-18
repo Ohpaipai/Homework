@@ -14,9 +14,14 @@
 #include<cstring>
 
 #define bug
+
+
+typedef std::pair<int, std::set<int>> Cone;
+
 class encryption;
 
 bool compareNode(NODE *_node1, NODE *_node2 );
+
 
 class encryption{
 	public:
@@ -42,14 +47,13 @@ class encryption{
 		std::vector<NODE*>				KEY_Ary;
 		std::map<std::string, NODE*>	name2node;
 		std::string 			 		key;
-		std::vector<std::set<NODE*>> 	AndCone;
-		std::vector<std::set<NODE*>> 	OrCone;
+		std::vector<Cone>				ANDLogicCone;
 		int 					 		area;
-		int*							color;
+		std::vector<int>				color;
 		void							caculateArea();
 		void							DFS(int,int*);
 		void 							RecursiveFtype(NODE* _node, int& max, FType _ft);
-		void  							RecursiveLogicCone(std::set<NODE*>&, NODE*, FType);
+		void  							RecursiveLogicCone(std::set<int>&, NODE*, FType);
 };
 
 #endif

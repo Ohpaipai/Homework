@@ -79,6 +79,13 @@ class NODE{
 			//std::cout<<"testB ->" <<name<<" , "<<_name<<std::endl;
 			return name == _name;
 		}
+		
+		bool operator >(NODE* _A){
+			return name > _A->getName();
+		}
+		bool operator <(NODE* _A){
+			return name < _A->getName();
+		}
 
 		
 		//operator
