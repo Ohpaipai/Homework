@@ -39,21 +39,26 @@ class encryption{
 				void		readfile(std::string);				//read .bench file
 				void		witefile();				//write .bench file with encryption
 				void		topological_sort();		// pre-process for logic cone
-				void		Flogic_cone();
+				void		Flogic_cone();			//get logic cone
+				void		tree_encryption();		//encryption
 	private:
 		std::vector<NODE*>				NODE_Ary;
 		std::vector<NODE*>				PI_Ary;
 		std::vector<NODE*>				PO_Ary;
 		std::vector<NODE*>				KEY_Ary;
+		std::vector<NODE*>				ENCY_Ary;
 		std::map<std::string, NODE*>	name2node;
 		std::string 			 		key;
 		std::vector<CONE*>				LogicCone;
 		int 					 		area;
+		int 							keyCount;	
 		std::vector<int>				color;
 		void							caculateArea();
 		void							DFS(int,int*);
 		void 							RecursiveFtype(NODE* _node, int& max, FType _ft);
 		void  							RecursiveLogicCone(CONE*, NODE*, FType);
+		void							AND_encryption(CONE*);
+		void							OR_encryption(CONE*);
 };
 
 #endif

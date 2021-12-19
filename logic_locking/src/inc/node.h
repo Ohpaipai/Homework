@@ -51,13 +51,13 @@ class NODE{
 	public:
 
 		NODE()
-			:t(Type::Intl), ft(FType::BUF), name(""), path_len(0), and_counter(0), or_counter(0), start(0), end(0), id(0){
+			:enc(false), t(Type::Intl), ft(FType::BUF), name(""), path_len(0), and_counter(0), or_counter(0), start(0), end(0), id(0){
 		}
 
 
 
 		NODE(Type _t, FType _ft, std::string _name)
-			:t(_t), ft(_ft), name(_name), path_len(0), and_counter(0), or_counter(0), start(0), end(0), id(0){
+			:t(_t), ft(_ft), name(_name), path_len(0), and_counter(0), or_counter(0), start(0), end(0), id(0), enc(false){
 		}
 
 		~NODE(){
@@ -118,7 +118,10 @@ class NODE{
 				void		setId(int _num)				{ id = _num; 						}
 		std::vector<NODE*>& getFI()						{ return FI_Ary;					}	
 		std::vector<NODE*>& getFO()						{ return FO_Ary;					}	
-				void		ANDLogicCone();			
+		const	bool		isEncryption()				{ return enc;						}	
+				void		setEncryption(bool _enc)	{ enc = _enc;						}
+				void 		clearFI()					{ FI_Ary.clear();					}
+				void 		clearFO()					{ FI_Ary.clear();					}
 	private:
 		Type				t;
 		FType				ft;
@@ -131,6 +134,7 @@ class NODE{
 		int 				id;
 		int					start;
 		int					end;
+		bool				enc;
 };
 
 #endif

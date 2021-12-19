@@ -24,7 +24,7 @@ bool CONE::operator ==(CONE* _C){
 }
 
 std::ostream& operator<<(std::ostream& os, CONE* _cone){
-	os<<_cone->output->getName()<<" -> \n";
+	os<<"["<<_cone->getFtype()<<"]"<<_cone->output->getName()<<" -> ";
 	for(auto p: _cone->input){
 		os<<p->getName()<<" ";
 	}
@@ -32,4 +32,8 @@ std::ostream& operator<<(std::ostream& os, CONE* _cone){
 
 	return os;
 
+}
+
+bool compareCone(CONE *_cone1, CONE *_cone2 ){
+	return _cone1->getInput().size() > _cone2->getInput().size();
 }

@@ -12,6 +12,8 @@
 
 class CONE;
 
+bool compareCone(CONE *_cone1, CONE *_cone2 );
+
 class CONE{
 
 	public:
@@ -48,6 +50,7 @@ class CONE{
 		int					IntersectionSize(CONE* _cone);	//get two set insterction size
 		FType				getFtype()						{ return type;				 	}
 		void				setFtype(FType _type)			{ type = _type;					}
+		
 	private:
 		NODE* output;
 		std::set<NODE*>input;
