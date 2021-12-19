@@ -4,6 +4,7 @@
 #define _ENCRYPTION_H
 
 #include"./node.h"
+#include"./cone.h"
 #include<iostream>
 #include<sstream>
 #include<fstream>
@@ -16,7 +17,6 @@
 #define bug
 
 
-typedef std::pair<int, std::set<int>> Cone;
 
 class encryption;
 
@@ -47,7 +47,7 @@ class encryption{
 		std::vector<NODE*>				KEY_Ary;
 		std::map<std::string, NODE*>	name2node;
 		std::string 			 		key;
-		std::vector<Cone>				ANDLogicCone;
+		std::vector<CONE>				LogicCone;
 		int 					 		area;
 		std::vector<int>				color;
 		void							caculateArea();

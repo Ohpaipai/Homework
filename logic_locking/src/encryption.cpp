@@ -424,17 +424,9 @@ void encryption::Flogic_cone(){
 	for(auto p: NODE_Ary){
 		if(color[p->getId()] == 0 && (p->getFtype()== FType::AND || p->getFtype() == FType::OR)){
 			color[p->getId()] = 1;
-			Cone tem;
-			tem.first = p->getId();
-			RecursiveLogicCone(tem.second, p, p->getFtype());
-			ANDLogicCone.push_back(tem);
 		}
 	}
 	
-	std::cout<<NODE_Ary[ANDLogicCone[0].first]->getName()<<std::endl;
-	for(auto p: ANDLogicCone[0].second){
-		std::cout<<NODE_Ary[p]->getName()<<" ";
-	}
 
 	
 	std::cout<<"\nhello\n";
