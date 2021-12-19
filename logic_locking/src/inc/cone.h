@@ -18,6 +18,10 @@ class CONE{
 		CONE(){
 			input.clear();
 		}
+		CONE(FType _ft, NODE* _node)
+			:type(_ft), output(_node){
+			input.clear();
+		}
 		CONE(FType _ft)
 			:type(_ft){
 			input.clear();

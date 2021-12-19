@@ -57,9 +57,9 @@ int main(int argc, char* argv[]){
 		for(auto p:SV){
 			std::cout<<p->getName()<<std::endl;
 		}
-/*		encryption* enc = new encryption();
+		encryption* enc = new encryption();
 		enc->readfile(argv[1]);
 		enc->topological_sort();
 		enc->Flogic_cone();
-*/	return 0;
+	return 0;
 }

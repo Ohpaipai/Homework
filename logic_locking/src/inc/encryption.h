@@ -47,13 +47,13 @@ class encryption{
 		std::vector<NODE*>				KEY_Ary;
 		std::map<std::string, NODE*>	name2node;
 		std::string 			 		key;
-		std::vector<CONE>				LogicCone;
+		std::vector<CONE*>				LogicCone;
 		int 					 		area;
 		std::vector<int>				color;
 		void							caculateArea();
 		void							DFS(int,int*);
 		void 							RecursiveFtype(NODE* _node, int& max, FType _ft);
-		void  							RecursiveLogicCone(std::set<int>&, NODE*, FType);
+		void  							RecursiveLogicCone(CONE*, NODE*, FType);
 };
 
 #endif

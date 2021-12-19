@@ -380,30 +380,29 @@ void encryption::RecursiveFtype(NODE* _node, int& max,FType _ft){
 
 }
 
-void  encryption::RecursiveLogicCone(std::set<int>& _s, NODE* _node, FType _ft){
-	
+void encryption::RecursiveLogicCone(CONE* _cone, NODE* _node, FType _ft){	
 	if(_ft == FType::AND){ //AND
 		for(auto p :_node->getFI()){
 			if(p->getAndC() == 0){
 				//std::cout<<"test : "<<p->getName()<<std::endl;
-				_s.insert(p->getId());
+				_cone->insertInput(NODE_Ary[p->getId()]);
 				color[p->getId()] = 1;
 			}
 			else if(p->getAndC() >= 1){
 				color[p->getId()] = 1;
-				RecursiveLogicCone(_s, NODE_Ary[p->getId()], _ft);
+				RecursiveLogicCone(_cone, NODE_Ary[p->getId()], _ft);
 			}
 		}
 	}
 	else{ //OR
 		for(auto p :_node->getFI()){
 			if(p->getOrC() == 0){
-				_s.insert(p->getId());
+				_cone->insertInput(NODE_Ary[p->getId()]);
 				color[p->getId()] = 1;
 			}
 			else if(p->getOrC() >= 1){
 				color[p->getId()] = 1;
-				RecursiveLogicCone(_s, NODE_Ary[p->getId()], _ft);
+				RecursiveLogicCone(_cone, NODE_Ary[p->getId()], _ft);
 			}
 		}
 	}
@@ -424,7 +423,14 @@ void encryption::Flogic_cone(){
 	for(auto p: NODE_Ary){
 		if(color[p->getId()] == 0 && (p->getFtype()== FType::AND || p->getFtype() == FType::OR)){
 			color[p->getId()] = 1;
+			CONE* c =new CONE(p->getFtype(), NODE_Ary[p->getId()]);
+			RecursiveLogicCone(c, NODE_Ary[p->getId()], p->getFtype());
+			LogicCone.push_back(c);
 		}
+	}
+
+	for(auto p : LogicCone){
+		std::cout<<p<<std::endl;
 	}
 	
 
