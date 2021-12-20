@@ -122,7 +122,11 @@ class NODE{
 				void		setEncryption(bool _enc)	{ enc = _enc;						}
 				void 		clearFI()					{ FI_Ary.clear();					}
 				void 		clearFO()					{ FO_Ary.clear();					}
-		const	std::string stringFType(); 
+		const	std::string stringFType();
+		const 	FType 		getEncType()				{ return enc_type;					}
+				void 		setEncType(FType _ft)		{ enc_type = _ft;					}
+				NODE*		getEncNode()				{ return enc_node;					}
+				void 		setEncNode(NODE* _node)		{ enc_node = _node;					}	
 	private:
 		Type				t;
 		FType				ft;
@@ -136,6 +140,8 @@ class NODE{
 		int					start;
 		int					end;
 		bool				enc;
+		FType				enc_type;
+		NODE*				enc_node;	
 };
 
 #endif

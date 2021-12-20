@@ -12,9 +12,12 @@
 #include<cctype>
 #include<algorithm>
 #include<stdio.h>
+#include <random>
+#include <chrono>
 #include<cstring>
+#include <time.h>
 
-#define bug
+//#define bug
 
 
 
@@ -55,13 +58,14 @@ class encryption{
 		int 					 		area;
 		int 							keyCount;	
 		std::vector<int>				color;
-		std::vector<int>				color2;
+		std::vector<int>				hue;
 		void							caculateArea();
 		void							DFS(int,int*);
 		void 							RecursiveFtype(NODE* _node, int& max, FType _ft);
 		void  							RecursiveLogicCone(CONE*, NODE*, FType);
 		void							AND_encryption(CONE*);
 		void							OR_encryption(CONE*);
+		void							constructEncryKey(FType, NODE*, NODE*,double ); 
 };
 
 #endif

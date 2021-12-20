@@ -1,4 +1,4 @@
-//#include "./inc/node.h"
+#include "./inc/node.h"
 #include "./inc/encryption.h"
 int main(int argc, char* argv[]){
 
@@ -25,9 +25,6 @@ int main(int argc, char* argv[]){
 		ary[1]->insertFO(A);
 		std::cout<<"Index="<<ary[1]->FOfind(A)<<std::endl;
 		std::cout<<(A==ary[0])<<std::endl;
-	#endif
-	
-
 		std::set<NODE*>S;
 		std::set<NODE*>SV;
 		std::set<NODE*>U;
@@ -57,6 +54,8 @@ int main(int argc, char* argv[]){
 		for(auto p:SV){
 			std::cout<<p->getName()<<std::endl;
 		}
+	#endif
+		std::srand((unsigned)time( NULL ) );
 		encryption* enc = new encryption();
 		enc->readfile(argv[1]);
 		enc->topological_sort();

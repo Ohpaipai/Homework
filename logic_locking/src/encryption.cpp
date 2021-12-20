@@ -404,10 +404,10 @@ void encryption::RecursiveLogicCone(CONE* _cone, NODE* _node, FType _ft){
 		for(auto p :_node->getFI()){
 			if(p->getOrC() == 0){
 				_cone->insertInput(NODE_Ary[p->getId()]);
-				color2[p->getId()] = 1;
+				hue[p->getId()] = 1;
 			}
 			else if(p->getOrC() >= 1){
-				color2[p->getId()] = 1;
+				hue[p->getId()] = 1;
 				RecursiveLogicCone(_cone, NODE_Ary[p->getId()], _ft);
 			}
 		}
@@ -419,9 +419,9 @@ void encryption::Flogic_cone(){
 	
 	//reverse topological sort
 	std::reverse(NODE_Ary.begin(), NODE_Ary.end());
-	color2.resize(NODE_Ary.size());
+	hue.resize(NODE_Ary.size());
 	std::fill(color.begin(), color.end(), 0);
-	std::fill(color2.begin(), color2.end(), 0);
+	std::fill(hue.begin(), hue.end(), 0);
 	
 	int counc =0;
 	for(auto p : NODE_Ary){
@@ -433,8 +433,8 @@ void encryption::Flogic_cone(){
 			if(p->getFtype() == FType::AND)
 				color[p->getId()] = 1;
 			else	
-				color2[p->getId()] = 1;
-			std::cout<<p->getName()<<"="<<std::endl;
+				hue[p->getId()] = 1;
+			//std::cout<<p->getName()<<"="<<std::endl;
 			CONE* c =new CONE(p->getFtype(), NODE_Ary[p->getId()]);
 			RecursiveLogicCone(c, NODE_Ary[p->getId()], p->getFtype());
 			LogicCone.push_back(c);
@@ -451,41 +451,153 @@ void encryption::Flogic_cone(){
 	}
 
 }
+void encryption::constructEncryKey(FType _ft, NODE* _combinekey, NODE* _node, double _rand){
+	if(_ft == FType::AND){
+		std::string name = "";
+		name = "keyinput";
+		name += std::to_string(keyCount++);
+		NODE *ktem = new NODE(Type::PI, FType::BUF, name);
+		KEY_Ary.push_back(ktem);
+		//encry
+		if(_rand > 0.4){ //XOR
+			name.clear();
+			name = "ENCXOR";
+			name += std::to_string(keyCount++);
+			NODE *tem = new NODE(Type::Intl, FType::XOR, name);
+			ENCY_Ary.push_back(tem);
+			//keyi xor xi
+			tem->insertFI(_node); 
+			tem->insertFI(ktem);
+			//and comnine
+			tem->insertFO(_combinekey);
+			_combinekey->insertFI(tem);
+			
+			// p =  _node set
+			_node->setEncNode(tem);
+			_node->setEncryption(true);
+			_node->setEncType(FType::XOR);
+			key += "0";
+		}
+		else{//XNOR
+			area +=1;
+			name.clear();
+			name = "ENCXNOR";
+			name += std::to_string(keyCount++);
+			NODE *tem = new NODE(Type::Intl, FType::XOR, name);
+			ENCY_Ary.push_back(tem);
+			
+			//not flip
+			name.clear();
+			name = "ENCNOT";
+			name += std::to_string(keyCount++);
+			NODE *temNot = new NODE(Type::Intl, FType::NOT, name);
+			ENCY_Ary.push_back(temNot);
+					
+			//keyi xor xi
+			tem->insertFI(_node); 
+			tem->insertFI(ktem);
+			//and comnine
+			tem->insertFO(temNot);
+			temNot->insertFI(tem);
+			temNot->insertFO(_combinekey);
+			_combinekey->insertFI(temNot);
+			
+			// p =  _node set
+			_node->setEncNode(temNot);
+			_node->setEncryption(true);
+			_node->setEncType(FType::XNOR);
+			key += "1";
+		}
+	}
+	else if(_ft == FType::OR){
+		std::string name = "";
+		name = "keyinput";
+		name += std::to_string(keyCount++);
+		NODE *ktem = new NODE(Type::PI, FType::BUF, name);
+		KEY_Ary.push_back(ktem);
+		//encry
+		if(_rand > 0.4){ //XOR
+			name.clear();
+			name = "ENCXOR";
+			name += std::to_string(keyCount++);
+			NODE *tem = new NODE(Type::Intl, FType::XOR, name);
+			ENCY_Ary.push_back(tem);
+			//keyi xor xi
+			tem->insertFI(_node); 
+			tem->insertFI(ktem);
+			//or comnine
+			tem->insertFO(_combinekey);
+			_combinekey->insertFI(tem);
+			
+			// p =  _node set
+			_node->setEncNode(tem);
+			_node->setEncryption(true);
+			_node->setEncType(FType::XOR);
+			key += "0";
+		}
+		else{//XNOR
+			area +=1;
+			name.clear();
+			name = "ENCXNOR";
+			name += std::to_string(keyCount++);
+			NODE *tem = new NODE(Type::Intl, FType::XOR, name);
+			ENCY_Ary.push_back(tem);
+			
+			//not flip
+			name.clear();
+			name = "ENCNOT";
+			name += std::to_string(keyCount++);
+			NODE *temNot = new NODE(Type::Intl, FType::NOT, name);
+			ENCY_Ary.push_back(temNot);
+					
+			//keyi xor xi
+			tem->insertFI(_node); 
+			tem->insertFI(ktem);
+			//or comnine
+			tem->insertFO(temNot);
+			temNot->insertFI(tem);
+			temNot->insertFO(_combinekey);
+			_combinekey->insertFI(temNot);
+			
+			// p =  _node set
+			_node->setEncNode(temNot);
+			_node->setEncryption(true);
+			_node->setEncType(FType::XNOR);
+			key += "1";
+		}
+	}
+}
 
 void encryption::AND_encryption(CONE* _cone){
 	//f' = f∨(∧[n~1] (xi ^ki))
 	area +=	4*_cone->getInput().size();
 	
 	std::string tems = "";
-	std::string name = "ENCAND";
+	std::string name = "";
 
 	//make key encryption
 	
 	//construct AND key
+	//this is and all of the keyi^xi
 	name.clear();
 	name = "ENCAND";
 	name += std::to_string(keyCount++);
 	NODE *andkey = new NODE(Type::Intl, FType::AND, name);
 	ENCY_Ary.push_back(andkey);
 
+	//this is construct keyi^xi
 	for(auto p: _cone->getInput()){
-		//first construct key
-		name.clear();
-		name = "keyinput";
-		name += std::to_string(keyCount++);
-		NODE *ktem = new NODE(Type::PI, FType::BUF, name);
-		KEY_Ary.push_back(ktem);	
-		//encry
-		name.clear();
-		name = "ENCXOR";
-		name += std::to_string(keyCount++);
-		NODE *tem = new NODE(Type::Intl, FType::XOR, name);
-		ENCY_Ary.push_back(tem);
-
-		tem->insertFI(NODE_Ary[p->getId()]);
-		tem->insertFI(ktem);
-		tem->insertFO(andkey);
-		andkey->insertFI(tem);
+		if(p->isEncryption()){
+			area -= 3;
+			andkey->insertFI(p->getEncNode());
+			p->getEncNode()->insertFO(andkey);
+		}
+		else{
+			//construct key
+			double  randnum = (double)rand()/RAND_MAX ;
+			std::cout<<randnum<<std::endl;
+			constructEncryKey(FType::AND, andkey, p, randnum);	
+		}
 	}
 
 	//combinational all or
@@ -526,23 +638,17 @@ void encryption::OR_encryption(CONE* _cone){
 	ENCY_Ary.push_back(orkey);
 
 	for(auto p: _cone->getInput()){
-		//first construct key
-		name.clear();
-		name = "keyinput";
-		name += std::to_string(keyCount++);
-		NODE *ktem = new NODE(Type::PI, FType::BUF, name);
-		KEY_Ary.push_back(ktem);	
-		//encry
-		name.clear();
-		name = "ENCXOR";
-		name += std::to_string(keyCount++);
-		NODE *tem = new NODE(Type::Intl, FType::XOR, name);
-		ENCY_Ary.push_back(tem);
-
-		tem->insertFI(NODE_Ary[p->getId()]);
-		tem->insertFI(ktem);
-		tem->insertFO(orkey);
-		orkey->insertFI(tem);
+		if(p->isEncryption()){
+			area -= 3;
+			orkey->insertFI(p->getEncNode());
+			p->getEncNode()->insertFO(orkey);
+		}
+		else{
+			//construct key
+			double  randnum = (double)rand()/RAND_MAX ;
+			std::cout<<randnum<<std::endl;
+			constructEncryKey(FType::OR, orkey, p, randnum);	
+		}
 	}
 
 	//combinational all and
@@ -597,6 +703,8 @@ void encryption::outputfile(){
 	if(out.is_open()){
 		std::cout<<"out open\n";
 	}
+
+	out<<"# key="<<key<<std::endl;
 	//INPUT
 	for(auto p: PI_Ary){
 		std::string tem = "INPUT(";
