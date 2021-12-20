@@ -121,7 +121,8 @@ class NODE{
 		const	bool		isEncryption()				{ return enc;						}	
 				void		setEncryption(bool _enc)	{ enc = _enc;						}
 				void 		clearFI()					{ FI_Ary.clear();					}
-				void 		clearFO()					{ FI_Ary.clear();					}
+				void 		clearFO()					{ FO_Ary.clear();					}
+		const	std::string stringFType(); 
 	private:
 		Type				t;
 		FType				ft;

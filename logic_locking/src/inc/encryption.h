@@ -41,6 +41,7 @@ class encryption{
 				void		topological_sort();		// pre-process for logic cone
 				void		Flogic_cone();			//get logic cone
 				void		tree_encryption();		//encryption
+				void		outputfile();
 	private:
 		std::vector<NODE*>				NODE_Ary;
 		std::vector<NODE*>				PI_Ary;
@@ -50,9 +51,11 @@ class encryption{
 		std::map<std::string, NODE*>	name2node;
 		std::string 			 		key;
 		std::vector<CONE*>				LogicCone;
+		std::string	 			 		filename;	
 		int 					 		area;
 		int 							keyCount;	
 		std::vector<int>				color;
+		std::vector<int>				color2;
 		void							caculateArea();
 		void							DFS(int,int*);
 		void 							RecursiveFtype(NODE* _node, int& max, FType _ft);

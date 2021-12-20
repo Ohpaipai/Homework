@@ -7,6 +7,7 @@ encryption::encryption(){
 	PO_Ary.clear();
 	KEY_Ary.clear();
 	name2node.clear();
+	filename = "";
 	key="";
 	keyCount = 0;
 	area = 0;
@@ -27,6 +28,8 @@ encryption::~encryption(){
 
 
 void encryption::readfile(std::string _filename){
+	filename = _filename;
+
 	std::fstream input;
 	input.open(_filename,std::ios::in);
 	
@@ -401,10 +404,10 @@ void encryption::RecursiveLogicCone(CONE* _cone, NODE* _node, FType _ft){
 		for(auto p :_node->getFI()){
 			if(p->getOrC() == 0){
 				_cone->insertInput(NODE_Ary[p->getId()]);
-				color[p->getId()] = 1;
+				color2[p->getId()] = 1;
 			}
 			else if(p->getOrC() >= 1){
-				color[p->getId()] = 1;
+				color2[p->getId()] = 1;
 				RecursiveLogicCone(_cone, NODE_Ary[p->getId()], _ft);
 			}
 		}
@@ -416,7 +419,9 @@ void encryption::Flogic_cone(){
 	
 	//reverse topological sort
 	std::reverse(NODE_Ary.begin(), NODE_Ary.end());
+	color2.resize(NODE_Ary.size());
 	std::fill(color.begin(), color.end(), 0);
+	std::fill(color2.begin(), color2.end(), 0);
 	
 	int counc =0;
 	for(auto p : NODE_Ary){
@@ -425,7 +430,10 @@ void encryption::Flogic_cone(){
 	
 	for(auto p: NODE_Ary){
 		if(color[p->getId()] == 0 && (p->getFtype()== FType::AND || p->getFtype() == FType::OR)){
-			color[p->getId()] = 1;
+			if(p->getFtype() == FType::AND)
+				color[p->getId()] = 1;
+			else	
+				color2[p->getId()] = 1;
 			std::cout<<p->getName()<<"="<<std::endl;
 			CONE* c =new CONE(p->getFtype(), NODE_Ary[p->getId()]);
 			RecursiveLogicCone(c, NODE_Ary[p->getId()], p->getFtype());
@@ -446,7 +454,7 @@ void encryption::Flogic_cone(){
 
 void encryption::AND_encryption(CONE* _cone){
 	//f' = f∨(∧[n~1] (xi ^ki))
-	area +=	5*_cone->getInput().size();
+	area +=	4*_cone->getInput().size();
 	
 	std::string tems = "";
 	std::string name = "ENCAND";
@@ -463,7 +471,7 @@ void encryption::AND_encryption(CONE* _cone){
 	for(auto p: _cone->getInput()){
 		//first construct key
 		name.clear();
-		name = "KEYINPUT";
+		name = "keyinput";
 		name += std::to_string(keyCount++);
 		NODE *ktem = new NODE(Type::PI, FType::BUF, name);
 		KEY_Ary.push_back(ktem);	
@@ -487,6 +495,7 @@ void encryption::AND_encryption(CONE* _cone){
 	NODE *orkey = new NODE(Type::Intl, FType::OR, name);
 	orkey->insertFI(andkey);
 	orkey->insertFI(_cone->getOutput());
+	ENCY_Ary.push_back(orkey);
 
 	//erase and original FO's FI
 	for(auto p: _cone->getOutput()->getFO()){
@@ -502,7 +511,7 @@ void encryption::AND_encryption(CONE* _cone){
 
 void encryption::OR_encryption(CONE* _cone){
 	//f' = f∧(v[n~1] (xi ^ki))
-	area +=	5*_cone->getInput().size();
+	area +=	4*_cone->getInput().size();
 	
 	std::string tems = "";
 	std::string name = "ENCAND";
@@ -519,7 +528,7 @@ void encryption::OR_encryption(CONE* _cone){
 	for(auto p: _cone->getInput()){
 		//first construct key
 		name.clear();
-		name = "KEYINPUT";
+		name = "keyinput";
 		name += std::to_string(keyCount++);
 		NODE *ktem = new NODE(Type::PI, FType::BUF, name);
 		KEY_Ary.push_back(ktem);	
@@ -543,26 +552,18 @@ void encryption::OR_encryption(CONE* _cone){
 	NODE *andkey = new NODE(Type::Intl, FType::AND, name);
 	andkey->insertFI(orkey);
 	andkey->insertFI(_cone->getOutput());
-
+	ENCY_Ary.push_back(andkey);
+	
 	//erase and original FO's FI
 	for(auto p: _cone->getOutput()->getFO()){
 		p->eraseFI(_cone->getOutput());
-		p->insertFI(orkey);
+		p->insertFI(andkey);
 		andkey->insertFO(p);
 	}
 	// update original and
 	_cone->getOutput()->clearFO();
 	_cone->getOutput()->insertFO(andkey);
 }
-
-
-
-
-
-
-
-
-
 
 void encryption::tree_encryption(){
 	//unuse = 0, used = 1;
@@ -574,4 +575,92 @@ void encryption::tree_encryption(){
 	std::vector<int>intersectionC;
 	intersectionC.resize(LogicCone.size());
 	std::fill(intersectionC.begin(), intersectionC.end(), 0); //reset
+
+	for(auto p :LogicCone){
+		if(p->getFtype() == FType::AND){
+			AND_encryption(p);
+		}
+		else{
+			OR_encryption(p);
+		}
+	//	this->outputfile();
+	}
+
+}
+
+void encryption::outputfile(){
+	std::fstream out;
+	std::string fname = "ENC";
+	fname += filename;
+	out.open(fname, std::ios::out);
+	
+	if(out.is_open()){
+		std::cout<<"out open\n";
+	}
+	//INPUT
+	for(auto p: PI_Ary){
+		std::string tem = "INPUT(";
+		tem += p->getName();
+		tem+=")";
+		out<<tem<<std::endl;
+	}
+
+	//OUTPUT
+	for(auto p: PO_Ary){
+		std::string tem = "OUTPUT(";
+		tem += p->getName();
+		tem+=")";
+		out<<tem<<std::endl;
+	}
+
+	//OUTkey
+	for(auto p: KEY_Ary){
+		std::string tem = "INPUT(";
+		tem += p->getName();
+		tem+=")";
+		out<<tem<<std::endl;
+	}
+
+	// original circuit
+	for(auto p: NODE_Ary){
+//		std::cout<<p->getName()<<std::endl;
+		std::string tem = "";
+		if( p->getType() == Type::Intl || p->getType() == Type::PO ){
+			tem = p->getName();
+			tem += " = ";
+			tem += p->stringFType();
+			tem += "(";
+			
+			for(size_t i=0; i< p->getFI().size(); i++){
+				tem += p->getFI()[i]->getName();
+				if(i+1 == p->getFI().size()){
+					tem += ")";
+				}
+				else
+					tem += ",";
+			}
+			out<<tem<<std::endl;
+		}
+	}
+	// encry circuit
+	for(auto p: ENCY_Ary){
+		std::string tem = "";
+		tem = p->getName();
+		tem += " = ";
+		tem += p->stringFType();
+		tem += "(";
+		
+		for(size_t i=0; i< p->getFI().size(); i++){
+			tem += p->getFI()[i]->getName();
+			if(i+1 == p->getFI().size()){
+				tem += ")";
+			}
+			else
+				tem += ",";
+		}
+		out<<tem<<std::endl;
+	}
+	
+	std::cout<<"out down\n";
+	out.close();
 }

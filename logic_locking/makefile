@@ -1,7 +1,7 @@
 CC=g++
 #LDFLAGS=-std=c++11  -I /usr/local/include/boost/ -lm -O3 
 LDFLAGS=-std=c++11 -lm -g
-#LDFLAGS=-lm -O3 
+#LDFLAGS=-std=c++11 -lm -O3 
 SOURCES= ./src/node.cpp ./src/cone.cpp ./src/encryption.cpp ./src/main.cpp
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=logic_lock.o
