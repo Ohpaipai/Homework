@@ -57,6 +57,8 @@ int main(int argc, char* argv[]){
 	#endif
 		std::srand((unsigned)time( NULL ) );
 		encryption* enc = new encryption();
+		if(argc == 3)
+			enc->setOutputname(argv[2]);
 		enc->readfile(argv[1]);
 		enc->topological_sort();
 		enc->Flogic_cone();

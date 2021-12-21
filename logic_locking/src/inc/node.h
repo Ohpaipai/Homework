@@ -51,13 +51,13 @@ class NODE{
 	public:
 
 		NODE()
-			:enc(false), t(Type::Intl), ft(FType::BUF), name(""), path_len(0), and_counter(0), or_counter(0), start(0), end(0), id(0){
+			:CC0(0), CC1(0), CO(0), enc(false), t(Type::Intl), ft(FType::BUF), name(""), path_len(0), and_counter(0), or_counter(0), start(0), end(0), id(0){
 		}
 
 
 
 		NODE(Type _t, FType _ft, std::string _name)
-			:t(_t), ft(_ft), name(_name), path_len(0), and_counter(0), or_counter(0), start(0), end(0), id(0), enc(false){
+			:CC0(0), CC1(0), CO(0), t(_t), ft(_ft), name(_name), path_len(0), and_counter(0), or_counter(0), start(0), end(0), id(0), enc(false){
 		}
 
 		~NODE(){
@@ -73,7 +73,7 @@ class NODE{
 		//operator overloading
 		bool operator ==(NODE* _A){
 			//std::cout<<"test ->" <<name<<" , "<<_A->getName()<<std::endl;
-			return name == _A->getName();
+			return (name == _A->getName() && ft == _A->getFtype());
 		}
 		bool operator ==(std::string _name){
 			//std::cout<<"testB ->" <<name<<" , "<<_name<<std::endl;
@@ -86,6 +86,7 @@ class NODE{
 		bool operator <(NODE* _A){
 			return name < _A->getName();
 		}
+		friend std::ostream& operator<<(std::ostream& os, NODE* p);
 
 		
 		//operator
@@ -126,7 +127,13 @@ class NODE{
 		const 	FType 		getEncType()				{ return enc_type;					}
 				void 		setEncType(FType _ft)		{ enc_type = _ft;					}
 				NODE*		getEncNode()				{ return enc_node;					}
-				void 		setEncNode(NODE* _node)		{ enc_node = _node;					}	
+				void 		setEncNode(NODE* _node)		{ enc_node = _node;					}
+				void		setCC0(int _num)			{ CC0 = _num; 						}
+				void		setCC1(int _num)			{ CC1 = _num; 						}
+				void		setCO (int _num)			{ CO  = _num; 						}
+		const	int 		getCC0()					{ return CC0; 						} 
+		const	int 		getCC1()					{ return CC1; 						} 
+		const	int 		getCO ()					{ return CO; 						} 
 	private:
 		Type				t;
 		FType				ft;
@@ -141,7 +148,10 @@ class NODE{
 		int					end;
 		bool				enc;
 		FType				enc_type;
-		NODE*				enc_node;	
+		NODE*				enc_node;
+		int  				CC0;			//controllability 0
+		int  				CC1;			//controllability 1
+		int 	  			CO;				//observability 	
 };
 
 #endif

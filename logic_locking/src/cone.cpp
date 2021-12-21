@@ -35,5 +35,9 @@ std::ostream& operator<<(std::ostream& os, CONE* _cone){
 }
 
 bool compareCone(CONE *_cone1, CONE *_cone2 ){
-	return _cone1->getInput().size() > _cone2->getInput().size();
+	
+	if(_cone1->getInput().size() ==  _cone2->getInput().size())
+		return _cone1->getOutput()->getCO() > _cone2->getOutput()->getCO();
+	else
+		return _cone1->getInput().size() > _cone2->getInput().size();
 }
