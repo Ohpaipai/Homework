@@ -48,6 +48,7 @@ class CONE{
 		void				setOutput(NODE* _node)			{ output = _node;				}
 		void				eraseInput(NODE* _node);		//erase
 		int					IntersectionSize(CONE* _cone);	//get two set insterction size
+		std::set<NODE*>		IntersectionCone(std::vector<CONE*>);	//get two set insterction size
 		FType				getFtype()						{ return type;				 	}
 		void				setFtype(FType _type)			{ type = _type;					}
 		

@@ -621,12 +621,14 @@ void encryption::Flogic_cone(){
 	}
 	
 	for(auto p: NODE_Ary){
-		if(color[p->getId()] == 0 && (p->getFtype()== FType::AND || p->getFtype() == FType::OR)){
-			if(p->getFtype() == FType::AND)
-				color[p->getId()] = 1;
-			else	
-				hue[p->getId()] = 1;
-			//std::cout<<p->getName()<<"="<<std::endl;
+		if( color[p->getId()] == 0&& p->getFtype()== FType::AND){
+			color[p->getId()] = 1;
+			CONE* c =new CONE(p->getFtype(), NODE_Ary[p->getId()]);
+			RecursiveLogicCone(c, NODE_Ary[p->getId()], p->getFtype());
+			LogicCone.push_back(c);
+		}
+		else if( hue[p->getId()] == 0&& p->getFtype()== FType::OR){
+			hue[p->getId()] = 1;
 			CONE* c =new CONE(p->getFtype(), NODE_Ary[p->getId()]);
 			RecursiveLogicCone(c, NODE_Ary[p->getId()], p->getFtype());
 			LogicCone.push_back(c);
@@ -638,10 +640,11 @@ void encryption::Flogic_cone(){
 	}*/
 	std::sort(LogicCone.begin(), LogicCone.end(), compareCone);
 
-	/*std::cout<<"------------------------------------\n";
+	//std::cout<<"------------------------------------\n";
+	
 	for(auto p : LogicCone){
 		std::cout<<p;
-	}*/
+	}
 
 }
 void encryption::constructEncryKey(FType _ft, NODE* _combinekey, NODE* _node, double _rand){
@@ -709,7 +712,7 @@ void encryption::constructEncryKey(FType _ft, NODE* _combinekey, NODE* _node, do
 		NODE *ktem = new NODE(Type::PI, FType::BUF, name);
 		KEY_Ary.push_back(ktem);
 		//encry
-		if(_rand > 0.4){ //XOR
+		if(_rand > threshold){ //XOR
 			name.clear();
 			name = "ENCXOR";
 			name += std::to_string(keyCount++);
@@ -832,10 +835,15 @@ void encryption::OR_encryption(CONE* _cone){
 	name += std::to_string(keyCount++);
 	NODE *orkey = new NODE(Type::Intl, FType::OR, name);
 	ENCY_Ary.push_back(orkey);
-
+	
+	std::cout<<"size:"<<_cone->getInput().size()<<std::endl;
+	
 	for(auto p: _cone->getInput()){
 		if(p->isEncryption()){
-			area -= 3;
+			if(p->getEncType() == FType::XOR)
+				area -= 3;
+			else
+				area -= 2; 
 			orkey->insertFI(p->getEncNode());
 			p->getEncNode()->insertFO(orkey);
 		}
@@ -869,6 +877,7 @@ void encryption::OR_encryption(CONE* _cone){
 
 void encryption::tree_encryption(){
 	//unuse = 0, used = 1;
+	threshold = 0.0;
 	std::vector<int>is_use;
 	is_use.resize(LogicCone.size());
 	std::fill(is_use.begin(), is_use.end(), 0); //reset
@@ -878,34 +887,50 @@ void encryption::tree_encryption(){
 	std::cout<<area<<std::endl;
 	intersectionC.resize(LogicCone.size());
 	std::fill(intersectionC.begin(), intersectionC.end(), 0); //reset
-	int surplus_area = (int)std::floor((double)area*0.1);
+		
+	surplus_area = (int)std::floor((double)area*0.1);
+	int orig = surplus_area;
 	std::cout<<"remading_area : "<<surplus_area<<std::endl;
 	
-	while(surplus_area>0){
+	std::vector<CONE*>already_encry;
+	already_encry.clear();
+	while(surplus_area>8){
 		int last_area = area;
-		CONE *encrypt;
 		int count=0;
 		for(auto p :LogicCone){
 			if(is_use[count]==0){
-				if(p->getInput().size()*3 > surplus_area){
+				std::cout<<"need encryption size : "<< p->getInput().size()*3<<std::endl;
+				
+				int expected = p->IntersectionCone(already_encry).size();
+
+				if((p->getInput().size()-expected)*4 > surplus_area){
 					is_use[count] = 1;
 				}
 				else {
 					is_use[count] = 1;
-					encrypt = p;
+					already_encry.push_back(p);
+					if(p->getFtype() == FType::AND){
+						AND_encryption(p);
+					}
+					else{
+						OR_encryption(p);
+					}
+					std::cout<<"after encryption: "<<area<<std::endl;
+					//update intersectionC
+
 					break;
 				}
 			}
 			count++;
 		}
-		if(encrypt->getFtype() == FType::AND){
-			AND_encryption(encrypt);
-		}
-		else{
-			OR_encryption(encrypt);
-		}
 		//update
-		surplus_area = last_area - area;
+		surplus_area -= (area - last_area);
+
+		threshold *= (double)surplus_area/(double)orig ;
+		if(threshold < 0.1)
+			threshold = 0;
+		std::cout<<"threshold: "<<threshold<<std::endl;
+		std::cout <<"remading_area :" <<surplus_area << std::endl;
 	}
 
 }

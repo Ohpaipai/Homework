@@ -74,6 +74,7 @@ class encryption{
 		void							controllability();
 		void							observability();
 		double							threshold;
+		int 							surplus_area;
 };
 
 #endif

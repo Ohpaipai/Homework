@@ -14,6 +14,19 @@ int CONE::IntersectionSize(CONE* _cone){
 	std::set_intersection(input.begin(), input.end(), _cone->getInput().begin(), _cone->getInput().end(), std::inserter(U, U.begin()));
 	return U.size();
 }
+std::set<NODE*>	CONE::IntersectionCone(std::vector<CONE*>_vec){
+	std::set<NODE*>R;
+	R.clear();
+	for(auto p: _vec){
+		std::set<NODE*>U;
+		U.clear();
+		std::set_intersection(input.begin(), input.end(), p->getInput().begin(), p->getInput().end(), std::inserter(U, U.begin()));
+		std::set_union(R.begin(), R.end(), U.begin(), U.end(), std::inserter(R, R.begin()));
+		
+	}
+	return R;
+
+}
 
 
 bool CONE::operator ==(CONE* _C){
@@ -25,7 +38,7 @@ bool CONE::operator ==(CONE* _C){
 
 std::ostream& operator<<(std::ostream& os, CONE* _cone){
 	os<<"["<<_cone->getFtype()<<"]"<<_cone->output->getName()<<" -> ";
-	for(auto p: _cone->input){
+	for(auto p: _cone->getInput()){
 		os<<p->getName()<<" ";
 	}
 	os<<"\n";
