@@ -75,6 +75,11 @@ class encryption{
 		void							observability();
 		double							threshold;
 		int 							surplus_area;
+		int 	 						constraint;
+		void							ezXorenc(NODE*);
+		void							ezXnorenc(NODE*);
+		void							ezAndenc(NODE*);
+		void							ezOrenc(NODE*);
 };
 
 #endif

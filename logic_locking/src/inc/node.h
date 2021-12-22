@@ -47,6 +47,7 @@ std::ostream& operator<<(std::ostream& os, FType _ft);
 
 class NODE;
 
+
 class NODE{
 	public:
 
@@ -134,6 +135,7 @@ class NODE{
 		const	int 		getCC0()					{ return CC0; 						} 
 		const	int 		getCC1()					{ return CC1; 						} 
 		const	int 		getCO ()					{ return CO; 						} 
+				bool 		path3length(NODE*, int);
 	private:
 		Type				t;
 		FType				ft;
@@ -153,5 +155,7 @@ class NODE{
 		int  				CC1;			//controllability 1
 		int 	  			CO;				//observability 	
 };
+
+bool compareCO(NODE* _node1, NODE *_node2);
 
 #endif

@@ -17,6 +17,7 @@ encryption::encryption(){
 	keyCount = 0;
 	area = 0;
 	threshold = 0.4;
+	constraint = 0;
 }
 
 encryption::~encryption(){
@@ -98,9 +99,11 @@ void encryption::readfile(std::string _filename){
 				name2node[name] = n; 
 			}
 			else{
-				n = it->second;
-				//n->setFtype(ft);
-				n->setType(t);
+					n = it->second;
+					//n->setFtype(ft);
+				if(it->second->getType() != Type::PI)
+					n->setType(t);
+
 			}
 			//push in
 			PO_Ary.push_back(n);	
@@ -257,8 +260,11 @@ void encryption::readfile(std::string _filename){
 
 	//caculate area
 	this->caculateArea();
+	
+	surplus_area = (int)std::floor((double)area*0.1);
+	constraint = (int)std::floor((double)surplus_area/(double)4.0);
 
-
+	//std::cout<<constraint<<std::endl;
 }
 
 std::ostream& operator<<(std::ostream& os, NODE* p){
@@ -357,6 +363,14 @@ void encryption::controllability(){
 					p->setCC1(p->getFI()[0]->getCC0()+1);
 					break;
 				case FType::XNOR 	:
+					if(p->getFI().size() == 0)
+						break;
+					else if(p->getFI().size() == 1){
+						a = p->getFI()[0]->getCC0() + p->getFI()[0]->getCC1();
+						p->setCC0(a+1);
+						break;
+					}
+
 					a = p->getFI()[0]->getCC0() + p->getFI()[1]->getCC1();
 					b = p->getFI()[1]->getCC0() + p->getFI()[0]->getCC1();
 					p->setCC0(std::min(a, b)+1);
@@ -365,6 +379,13 @@ void encryption::controllability(){
 					p->setCC1(std::min(a, b)+1);
 					break;
 				case FType::XOR 	:  
+					if(p->getFI().size() == 0)
+						break;
+					else if(p->getFI().size() == 1){
+						a = p->getFI()[0]->getCC0() + p->getFI()[0]->getCC1();
+						p->setCC0(a+1);
+						break;
+					}
 					a = p->getFI()[0]->getCC0() + p->getFI()[1]->getCC1();
 					b = p->getFI()[1]->getCC0() + p->getFI()[0]->getCC1();
 					p->setCC0(std::min(a, b)+1);
@@ -373,10 +394,14 @@ void encryption::controllability(){
 					p->setCC1(std::min(a, b)+1);
 					break;
 				case FType::BUF 	:  
+					if(p->getFI().size() == 0)
+						break;
 					p->setCC0(p->getFI()[0]->getCC0()+1);
 					p->setCC1(p->getFI()[0]->getCC1()+1);
 					break;
 				default    			:  
+					if(p->getFI().size() == 0)
+						break;
 					p->setCC0(p->getFI()[0]->getCC0()+1);
 					p->setCC1(p->getFI()[0]->getCC1()+1);
 			}
@@ -497,8 +522,16 @@ void encryption::RecursiveLogicCone(CONE* _cone, NODE* _node, FType _ft){
 			}
 			else if(p->getAndC() >= 1){
 			//	std::cout<<"recursive : "<<p->getName()<<std::endl;
-				color[p->getId()] = 1;
-				RecursiveLogicCone(_cone, NODE_Ary[p->getId()], _ft);
+				//std::cout<<( _cone->getInput().size() + p->getFI().size() )<<std::endl;
+				if( ( _cone->getInput().size() + p->getFI().size() ) >= constraint){
+					_cone->insertInput(NODE_Ary[p->getId()]);
+					color[p->getId()] = 1;
+					return ;	
+				}
+				else{
+					color[p->getId()] = 1;
+					RecursiveLogicCone(_cone, NODE_Ary[p->getId()], _ft);
+				}
 			}
 		}
 		return;
@@ -510,8 +543,15 @@ void encryption::RecursiveLogicCone(CONE* _cone, NODE* _node, FType _ft){
 				hue[p->getId()] = 1;
 			}
 			else if(p->getOrC() >= 1){
-				hue[p->getId()] = 1;
-				RecursiveLogicCone(_cone, NODE_Ary[p->getId()], _ft);
+				if( ( _cone->getInput().size() + p->getFI().size() ) >= constraint){
+					_cone->insertInput(NODE_Ary[p->getId()]);
+					color[p->getId()] = 1;
+					return ;	
+				}
+				else{
+					hue[p->getId()] = 1;
+					RecursiveLogicCone(_cone, NODE_Ary[p->getId()], _ft);
+				}
 			}
 		}
 		return;
@@ -572,9 +612,18 @@ void encryption::observability(){
 				}
 				break;
 			case FType::NOT 	: 
+					if(p->getFI().size() == 0)
+						break;
 				p->getFI()[0]->setCO( p->getCO() +1);
 				break;
 			case FType::XNOR 	:
+					if(p->getFI().size() == 0)
+						break;
+					else if(p->getFI().size() == 1){
+						a = p->getFI()[0]->getCC0() + p->getFI()[0]->getCC1();
+						p->setCC0(a+1);
+						break;
+					}
 				a = p->getFI()[1]->getCC0();
 				b = p->getFI()[1]->getCC1();
 				p->getFI()[0]->setCO(std::min(a, b)+1+p->getCO());	
@@ -583,6 +632,13 @@ void encryption::observability(){
 				p->getFI()[1]->setCO(std::min(a, b)+1+p->getCO());	
 				break;
 			case FType::XOR 	:  
+					if(p->getFI().size() == 0)
+						break;
+					else if(p->getFI().size() == 1){
+						a = p->getFI()[0]->getCC0() + p->getFI()[0]->getCC1();
+						p->setCC0(a+1);
+						break;
+					}
 				a = p->getFI()[1]->getCC0();
 				b = p->getFI()[1]->getCC1();
 				p->getFI()[0]->setCO(std::min(a, b)+1+p->getCO());	
@@ -590,8 +646,9 @@ void encryption::observability(){
 				b = p->getFI()[0]->getCC1();
 				p->getFI()[1]->setCO(std::min(a, b)+1+p->getCO());	
 				break;
-				break;
 			case FType::BUF 	: 
+					if(p->getFI().size() == 0)
+						break;
 				if(p->getType() != Type::PI)
 					p->getFI()[0]->setCO( p->getCO() +1);
 				break;
@@ -635,16 +692,8 @@ void encryption::Flogic_cone(){
 		}
 	}
 
-/*	for(auto p : LogicCone){
-		std::cout<<p;
-	}*/
 	std::sort(LogicCone.begin(), LogicCone.end(), compareCone);
 
-	//std::cout<<"------------------------------------\n";
-	
-	for(auto p : LogicCone){
-		std::cout<<p;
-	}
 
 }
 void encryption::constructEncryKey(FType _ft, NODE* _combinekey, NODE* _node, double _rand){
@@ -836,7 +885,7 @@ void encryption::OR_encryption(CONE* _cone){
 	NODE *orkey = new NODE(Type::Intl, FType::OR, name);
 	ENCY_Ary.push_back(orkey);
 	
-	std::cout<<"size:"<<_cone->getInput().size()<<std::endl;
+//	std::cout<<"size:"<<_cone->getInput().size()<<std::endl;
 	
 	for(auto p: _cone->getInput()){
 		if(p->isEncryption()){
@@ -850,7 +899,7 @@ void encryption::OR_encryption(CONE* _cone){
 		else{
 			//construct key
 			double  randnum = (double)rand()/RAND_MAX ;
-			std::cout<<randnum<<std::endl;
+		//	std::cout<<randnum<<std::endl;
 			constructEncryKey(FType::OR, orkey, p, randnum);	
 		}
 	}
@@ -875,31 +924,155 @@ void encryption::OR_encryption(CONE* _cone){
 	_cone->getOutput()->insertFO(andkey);
 }
 
+void encryption::ezXorenc(NODE* _node){
+	std::string name = "";
+	name = "keyinput";
+	name += std::to_string(keyCount++);
+	NODE *ktem = new NODE(Type::PI, FType::BUF, name);
+	KEY_Ary.push_back(ktem);
+	key += "0";
+	
+	name = "ENCXOR";
+	name += std::to_string(keyCount++);
+	NODE *encNode = new NODE(Type::Intl, FType::XOR, name);
+	ENCY_Ary.push_back(encNode);
+	for(auto p:_node->getFO()){
+		p->eraseFI(_node);
+		p->insertFI(encNode);
+		encNode->insertFO(p);
+	}
+	_node->clearFO();
+	_node->insertFO(encNode);
+	encNode->insertFI(ktem);
+	encNode->insertFI(_node);
+	ktem->insertFO(encNode);
+	_node->setEncNode(encNode);
+	_node->setEncryption(true);
+}
+
+void encryption::ezXnorenc(NODE* _node){
+	std::string name = "";
+	name = "keyinput";
+	name += std::to_string(keyCount++);
+	NODE *ktem = new NODE(Type::PI, FType::BUF, name);
+	KEY_Ary.push_back(ktem);
+	key += "1";
+	
+	name = "ENCXNOR";
+	name += std::to_string(keyCount++);
+	NODE *encNode = new NODE(Type::Intl, FType::XNOR, name);
+	ENCY_Ary.push_back(encNode);
+
+	for(auto p:_node->getFO()){
+		p->eraseFI(_node);
+		p->insertFI(encNode);
+		encNode->insertFO(p);
+	}
+	_node->clearFO();
+	_node->insertFO(encNode);
+	encNode->insertFI(ktem);
+	encNode->insertFI(_node);
+	ktem->insertFO(encNode);
+	_node->setEncNode(encNode);
+	_node->setEncryption(true);
+}
+
+void encryption::ezOrenc(NODE* _node){
+	std::string name = "";
+	name = "keyinput";
+	name += std::to_string(keyCount++);
+	NODE *ktem = new NODE(Type::PI, FType::BUF, name);
+	KEY_Ary.push_back(ktem);
+	key += "0";
+	
+	name = "ENCOR";
+	name += std::to_string(keyCount++);
+	NODE *encNode = new NODE(Type::Intl, FType::OR, name);
+	ENCY_Ary.push_back(encNode);
+
+	for(auto p:_node->getFO()){
+		p->eraseFI(_node);
+		p->insertFI(encNode);
+		encNode->insertFO(p);
+	}
+	_node->clearFO();
+	_node->insertFO(encNode);
+	encNode->insertFI(ktem);
+	encNode->insertFI(_node);
+	ktem->insertFO(encNode);
+	_node->setEncNode(encNode);
+	_node->setEncryption(true);
+}
+
+void encryption::ezAndenc(NODE* _node){
+	std::string name = "";
+	name = "keyinput";
+	name += std::to_string(keyCount++);
+	NODE *ktem = new NODE(Type::PI, FType::BUF, name);
+	KEY_Ary.push_back(ktem);
+	key += "1";
+	
+	name = "ENCAND";
+	name += std::to_string(keyCount++);
+	NODE *encNode = new NODE(Type::Intl, FType::AND, name);
+	ENCY_Ary.push_back(encNode);
+
+	for(auto p:_node->getFO()){
+		p->eraseFI(_node);
+		p->insertFI(encNode);
+		encNode->insertFO(p);
+	}
+	_node->clearFO();
+	_node->insertFO(encNode);
+	encNode->insertFI(ktem);
+	encNode->insertFI(_node);
+	ktem->insertFO(encNode);
+	_node->setEncNode(encNode);
+	_node->setEncryption(true);
+}
+
 void encryption::tree_encryption(){
 	//unuse = 0, used = 1;
 	threshold = 0.0;
 	std::vector<int>is_use;
 	is_use.resize(LogicCone.size());
 	std::fill(is_use.begin(), is_use.end(), 0); //reset
-	
+
+	/*for(auto p:LogicCone){
+		std::cout<<p;
+	}*/
+
+	for(size_t i=0; i<LogicCone.size();i++){
+		if(is_use[i]==0){
+			for(size_t j=0; j<LogicCone.size();j++){
+				if(i!=j && is_use[i]==0 && is_use[j]==0){
+					auto pos = LogicCone[i]->getInput().find(LogicCone[j]->getOutput());
+					if(pos != LogicCone[i]->getInput().end()){
+						is_use[j]=1;
+					}
+					else{
+						auto pos2 = LogicCone[j]->getInput().find(LogicCone[i]->getOutput());
+						if(pos2 != LogicCone[j]->getInput().end()){
+							is_use[i]=1;
+						}
+					}
+				}
+			}
+		}
+	}
 	//intersection count
-	std::vector<int>intersectionC;
-	std::cout<<area<<std::endl;
-	intersectionC.resize(LogicCone.size());
-	std::fill(intersectionC.begin(), intersectionC.end(), 0); //reset
-		
-	surplus_area = (int)std::floor((double)area*0.1);
+
 	int orig = surplus_area;
-	std::cout<<"remading_area : "<<surplus_area<<std::endl;
 	
 	std::vector<CONE*>already_encry;
 	already_encry.clear();
 	while(surplus_area>8){
 		int last_area = area;
 		int count=0;
+		bool isf = false;
 		for(auto p :LogicCone){
 			if(is_use[count]==0){
-				std::cout<<"need encryption size : "<< p->getInput().size()*3<<std::endl;
+	//			std::cout<<"need encryption size : "<< p->getInput().size()*3<<std::endl;
 				
 				int expected = p->IntersectionCone(already_encry).size();
 
@@ -907,6 +1080,7 @@ void encryption::tree_encryption(){
 					is_use[count] = 1;
 				}
 				else {
+					isf = true;
 					is_use[count] = 1;
 					already_encry.push_back(p);
 					if(p->getFtype() == FType::AND){
@@ -915,29 +1089,74 @@ void encryption::tree_encryption(){
 					else{
 						OR_encryption(p);
 					}
-					std::cout<<"after encryption: "<<area<<std::endl;
+					//std::cout<<"after encryption: "<<area<<std::endl;
 					//update intersectionC
 
 					break;
 				}
 			}
+		
 			count++;
 		}
+		
 		//update
 		surplus_area -= (area - last_area);
 
 		threshold *= (double)surplus_area/(double)orig ;
 		if(threshold < 0.1)
 			threshold = 0;
-		std::cout<<"threshold: "<<threshold<<std::endl;
-		std::cout <<"remading_area :" <<surplus_area << std::endl;
+		//std::cout<<"threshold: "<<threshold<<std::endl;
+		//std::cout <<"remading_area :" <<surplus_area << std::endl;
+		if(isf == false)
+			break;
 	}
-
+			
+//		std::cout <<"after logic enc ="<<area<<"remading_area :" <<surplus_area << std::endl;
+	
+		std::sort(NODE_Ary.begin(), NODE_Ary.end(),compareCO);
+	//	std::sort(AND_Ary.begin(), AND_Ary.end(),compareCO);
+	//	std::sort(OR_Ary.begin(), OR_Ary.end(),compareCO);
+		int c=0;
+		for(auto p:NODE_Ary){
+			p->setId(c++);
+		}
+		
+		for(auto p:NODE_Ary){
+			if(p->getType() == Type::Intl && p->isEncryption()==false){
+				double  randnum = (double)rand()/RAND_MAX ;
+			//	std::cout<<randnum<<std::endl;
+				if(surplus_area >=3){
+					if(randnum >0.5){
+						ezXorenc(p);	
+					}
+					else {
+						ezXorenc(p);
+					}
+					area+=3;
+					surplus_area -=3;
+				}
+				else if(surplus_area <=0){
+					break;
+				}
+				else{
+					if(randnum >0.5){
+						ezAndenc(p);	
+					}
+					else {
+						ezOrenc(p);
+					}
+					
+					area+=1;
+					surplus_area -=1;
+				}
+			}
+		}
 }
 
 void encryption::outputfile(){
 	std::fstream out;
 	std::string fname = "";
+	
 	if(twolevelfile)
 		fname=outputname;
 	else{
@@ -947,9 +1166,9 @@ void encryption::outputfile(){
 	}
 	out.open(fname, std::ios::out);
 	
-	if(out.is_open()){
+/*	if(out.is_open()){
 		std::cout<<"out open\n";
-	}
+	}*/
 
 	out<<"# key="<<key<<std::endl;
 	//INPUT
@@ -1015,8 +1234,6 @@ void encryption::outputfile(){
 		}
 		out<<tem<<std::endl;
 	}
-	
-	std::cout<<"out down\n";
-	std::cout<<area<<std::endl;
+	std::cout<<key<<std::endl;	
 	out.close();
 }
