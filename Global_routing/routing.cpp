@@ -68,14 +68,14 @@ std::vector<Net>routing_net;
 std::vector<std::vector<Tile> >Grid;
 std::vector<std::vector<Node*> >Map;	
 std::vector<Node*>minheap;
-Node best;  //minheap's head
-int last;
+Node *best;  //minheap's head
+int last; //heap length
 //temporary
 std::string temS = "";
 int temC = 0;
 int count = 0;
 /*}}}*/
-
+/* min Heap operation{{{*/
 void Swap(int x, int y){
 	Node *tmp 	= minheap[x];
 	minheap[x] 	= minheap[y];
@@ -92,7 +92,7 @@ void InsertNode(){
 	}
 }
 
-void DelNode(){
+void Pophead(){
 	int now = 1;
 	int derived = now << 1; //*2
 	Swap(1, last--);
@@ -107,20 +107,95 @@ void DelNode(){
 	}
 }
 
+void minheapFilterUp(int k){
+	int parent;
 
+	while(k!=1){ //k has a parent node
+		parent = k >> 1;
+		if(minheap[k]->F < minheap[parent]->F){
+			Swap(k,parent);
+			k = parent;
+		}
+		else
+			break;
+	}
+}
 
+void minheapFilterDown(int k){
+	int child1, child2;
+	while(2*k <= last){ 		//has any child node
+		child1 = k<<1; 			//left child
+		child2 = child1+1;		// right child
+		
+		if(child2 <= last){		//if true, k has 2 childs
+			/* 
+			 * Node k has 2 children nodes
+             * Find the min. of 3 nodes 
+             */
+			if(minheap[k]->F< minheap[child1]->F && minheap[k]->F < minheap[child2]->F){
+				/* Node k in correction*/
+				break;
+			}
+			else{
+				/*
+				 * replace Node k with the smaller child node
+				 */
+				if(minheap[child1]->F < minheap[child2]->F){
+					/*
+					 * child1 is smaller, swap with k
+					 */
+					Swap(k,child1);
+					k = child1;
+				}
+				else{
+					Swap(k,child2);
+					k = child2;
+				}
+			}
+		}
+		else{
+			/* 
+			 * Node k only has 1 children node
+             */
+			if(minheap[k]->F < minheap[child1]->F){
+				/* Node k in correction*/
+				break;
+			}
+			else{
+					Swap(k,child1);
+					k = child1;
+			}
+		}
+	}
+}
 
+void DeleteNode(int k){
+	int parent;
+	minheap[k] = minheap[last];
+	last--;
+	parent >>= 1;
+	if( k==1 || minheap[parent]->F < minheap[k]->F)
+		minheapFilterUp(k);
+	else
+		minheapFilterDown(k);
+}
 
+int Find(Node *_n){
+	int return_index = -1;
+	for(int i=1;i<=last;i++){
+		if((minheap[i]->x == _n->x) && (minheap[i]->y == _n->y))
+			return i;
+	}
+	return return_index;
+}
+/*}}}*/
 
-
-
-
-/* Chebyshev distance */
+/* Chebyshev distance -> H-function  */
 int H(Node *_n, Node _e){
 	return std::max( std::abs(_e.x - _n->x), std::abs(_e.y - _n->y) );
 }
 
-/* Manhatten method for Source to current node */
+/* Manhatten method for Source to current node -> G-function */
 int G(Node *_n, Node _s){
 	return std::abs(_n->x - _s.x) + std::abs(_n->y - _s.y);
 }
@@ -133,7 +208,11 @@ int G(Node *_n, Node _s){
 */
 void Judge(int _x, int _y, short _from, int _cur){
 	
-	if(Map[_x][_y]->step > (Map[best.x][best.y]->step +1) || Map[_x][_y]->step == -1 ){
+	/*out of range*/
+	if(_x < 0 || _x >= gridX || _y < 0 || _y >= gridY)
+		return;
+
+	if(Map[_x][_y]->step > (Map[best->x][best->y]->step +1) || Map[_x][_y]->step == -1 ){
 		int demand = 0;
 		if( _from == 0){
 			demand = Grid[_x][_y].up+1; 
@@ -144,13 +223,32 @@ void Judge(int _x, int _y, short _from, int _cur){
 		else if(_from == 2){
 			demand = Grid[_x][_y].left+1; 
 		}
-		else{
+		else if(_from == 3){
 			demand = Grid[_x][_y].right+1; 
+		}
+		else{
+			demand = 1;
 		}
 
 		/*edge cost = 2^(demand/capacity)-1*/
 		double C = std::pow(2 , (double)((double)demand/(double)capacity)) + 1;
+		//F = (G+H)*edge cost
 		Map[_x][_y]->F = (double)(H(Map[_x][_y] , routing_net[_cur].end) + G(Map[_x][_y], routing_net[_cur].start))*C;
+		Map[_x][_y]->step = Map[best->x][best->y]->step+1;
+		//update heap
+		
+		int value = Find(Map[_x][_y]);
+		if(value==-1){
+			last++;
+			minheap[last] = Map[_x][_y]; 
+			InsertNode();
+		}
+		else{
+			DeleteNode(value);	
+			last++;
+			minheap[last] = Map[_x][_y]; 
+			InsertNode();
+		}
 	}
 }
 
@@ -162,6 +260,18 @@ void Astar(int _cur){
 			Map[i][j]->F		=  0;
 		}
 	
+	last = 0;
+	Judge(routing_net[_cur].start.x, routing_net[_cur].start.y, -1, _cur);
+	while (last > 0){
+		best = minheap[1];
+		if(best->x == routing_net[_cur].end.x && best->y == routing_net[_cur].end.y)
+			break;
+		Pophead();
+		Judge(routing_net[_cur].start.x+1, routing_net[_cur].start.y,2, _cur); //right
+		Judge(routing_net[_cur].start.x-1, routing_net[_cur].start.y,3, _cur); //left
+		Judge(routing_net[_cur].start.x, routing_net[_cur].start.y+1,1, _cur); //up
+		Judge(routing_net[_cur].start.x, routing_net[_cur].start.y-1,0, _cur); //down
+	}
 }
 
 
@@ -240,6 +350,12 @@ int main(int argc, char* argv[]){
 			ss >> routing_net[count].start.y;
 			ss >> routing_net[count].end.x;
 			ss >> routing_net[count].end.y;
+
+			//transform
+			routing_net[count].start.x 	= gridX - routing_net[count].start.x; 
+			routing_net[count].start.y 	= gridY - routing_net[count].start.y;
+			routing_net[count].end.x 	= gridX - routing_net[count].end.x;
+			routing_net[count].end.y 	= gridY - routing_net[count].end.y;
 			count++;
 		}
 	}
@@ -248,6 +364,7 @@ int main(int argc, char* argv[]){
 	/*sort net by HPWL*/
 	std::sort(routing_net.begin(), routing_net.end(),cmpNet);
 	/* A* algorithm */
-
-
+	for(int i = 0; i < routing_net.size(); i++){
+		Astar(i);
+	}
 }

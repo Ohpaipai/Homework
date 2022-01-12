@@ -1,6 +1,6 @@
 CC=g++
 LDFLAGS=-std=c++11 -O3 -lm
-SOURCES=*.cpp
+SOURCES=routing.cpp
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=m10915113
 INCLUDES=*.h
