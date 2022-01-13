@@ -36,4 +36,5 @@
 *.tgz
 *.in
 *.bench
+*.sh
 ./logic_locking/bin

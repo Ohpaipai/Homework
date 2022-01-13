@@ -1038,9 +1038,6 @@ void encryption::tree_encryption(){
 	is_use.resize(LogicCone.size());
 	std::fill(is_use.begin(), is_use.end(), 0); //reset
 
-	/*for(auto p:LogicCone){
-		std::cout<<p;
-	}*/
 
 	for(size_t i=0; i<LogicCone.size();i++){
 		if(is_use[i]==0){
@@ -1060,6 +1057,7 @@ void encryption::tree_encryption(){
 			}
 		}
 	}
+
 	//intersection count
 
 	int orig = surplus_area;
@@ -1120,7 +1118,7 @@ void encryption::tree_encryption(){
 		for(auto p:NODE_Ary){
 			p->setId(c++);
 		}
-		
+	
 		for(auto p:NODE_Ary){
 			if(p->getType() == Type::Intl && p->isEncryption()==false){
 				double  randnum = (double)rand()/RAND_MAX ;
