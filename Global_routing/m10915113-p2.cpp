@@ -9,6 +9,7 @@
 #include<math.h>
 #include<iomanip>
 #include<map>
+#include<time.h>
 
 /* Data structure {{{*/
 class Node;
@@ -48,6 +49,7 @@ class Node{
 typedef struct Net{
 	int id;
 	Node start, end;
+	bool lshape;
 	std::vector<Node*>path;
 }Net;
 
@@ -369,8 +371,62 @@ void Astar(int _cur){
 	}
 }
 
+void Lshape(int _cur){
+//	std::cout<<_cur<<std::endl;
+	int x1 = routing_net[_cur].start.x;
+	int y1 = routing_net[_cur].start.y;
+	int x2 = routing_net[_cur].end.x;
+	int y2 = routing_net[_cur].end.y;
+
+//	std::cout<<x1<<","<<y1<<"   "<<x2<<","<<y2<<std::endl;
+
+
+	if(x1 > x2){
+		for(int i=x2;i<=x1;i++){
+			routing_net[_cur].path.push_back(Map[i][y2]);
+			//if(i != x1){
+			//	Grid[i][y2].right +=1;
+			//	Grid[i+1][y2].left +=1;
+			//}
+		}
+	}
+	else{
+		for(int i=x2;i>=x1;i--){
+//			std::cout<<i<<std::endl;
+			routing_net[_cur].path.push_back(Map[i][y2]);
+			//if(i != x1){
+			//	Grid[i][y2].left +=1;
+			//	Grid[i-1][y2].right +=1;
+			//}
+		}
+	}
+	
+	if(y1 < y2 ){
+		for(int i=y2-1;i>=y1;i--){
+			routing_net[_cur].path.push_back(Map[x1][i]);
+			//if(i != y1){
+			//	Grid[x1][i].up +=1;
+			//	Grid[x1][i-1].down +=1;
+			//}
+		}
+	}
+	else{
+		for(int i=y2+1;i<=y1;i++){
+			routing_net[_cur].path.push_back(Map[x1][i]);
+			//if(i != y1){
+			//	Grid[x1][i].down +=1;
+			//	Grid[x1][i+1].up +=1;
+			//}
+		}
+	}
+
+}
+
 
 int main(int argc, char* argv[]){
+	
+	clock_t start, end;
+	start = clock();
 	/*check command line{{{*/
 	if(argc !=3 ){
 		std::cout<< "Usage: ./[exe] [input file] [output file]"<<std::endl;
@@ -451,8 +507,9 @@ int main(int argc, char* argv[]){
 			ss >> routing_net[count].start.x;
 			ss >> routing_net[count].end.y;
 			ss >> routing_net[count].end.x;
-
-//			std::cout<<"("<<routing_net[count].start.y<<" , "<<routing_net[count].start.x<<") , ";
+			
+			routing_net[count].lshape = false;
+			//			std::cout<<"("<<routing_net[count].start.y<<" , "<<routing_net[count].start.x<<") , ";
 //			std::cout<<"("<<routing_net[count].end.y<<" , "<<routing_net[count].end.x<<") --> ";
 			//transform
 			routing_net[count].start.x 	= (gridY-1) - routing_net[count].start.x; 
@@ -469,7 +526,35 @@ int main(int argc, char* argv[]){
 	/*sort net by HPWL*/
 	std::sort(routing_net.begin(), routing_net.end(),cmpNet);
 	/* A* algorithm */
+/*	
+	int threshold = (gridY*gridX)*0.1;
+	
+	for(int i=routing_net.size()-1;i>=0;i--){
+		int r_x = std::abs(routing_net[i].start.x - routing_net[i].end.x);
+		int r_y = std::abs(routing_net[i].start.y - routing_net[i].end.y);
+
+		if( (r_x*r_y) >= threshold || true){
+			//do Lshape
+			Lshape(i);
+			routing_net[i].lshape=true;
+			std::cout<<"Lahspe : "<<i<<std::endl;
+		}
+
+	}
+*/
+
+	int lshape = routing_net.size();
 	for(int i = 0; i < routing_net.size(); i++){
+		
+		end = clock();
+		double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+		if(cpu_time_used >3450){ //3450 = 57.5min
+			lshape=i;
+			break;
+		}
+		/*if(routing_net[i].lshape == true)
+			continue;
+		*/
 		if(routing_net[i].start.x < routing_net[i].end.x){
 			constraintx1 = routing_net[i].start.x;
 			constraintx2 = routing_net[i].end.x;
@@ -539,6 +624,12 @@ int main(int argc, char* argv[]){
 		//std::cout<<i<<std::endl;
 		Astar(i);
 	}
+
+	for(int i = lshape; i < routing_net.size(); i++){
+		Lshape(i);
+		//std::cout<<"Lshape -> "<<i<<std::endl;
+	}
+
 	for(int i=0; i< num_net;i++){
 		output << routing_net[i].id<<" "<<routing_net[i].path.size()-1<<std::endl;
 		for(int j=routing_net[i].path.size()-1;j>=1;j--){
