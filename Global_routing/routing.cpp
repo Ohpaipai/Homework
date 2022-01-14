@@ -87,7 +87,6 @@ int constraintx1 = 0;
 int constrainty1 = 0;
 int constraintx2 = 0;
 int constrainty2 = 0;
-std::vector<std::pair<int, int> >initial;
 /*}}}*/
 /* min Heap operation{{{*/
 void Swap(int x, int y){
@@ -99,6 +98,8 @@ void Swap(int x, int y){
 }
 
 void InsertNode(){
+	
+//	minheap[last]->k = last;
 	int now  = last;
 	int base = last >> 1; // derived 2
 	while(base>0 && minheap[base]->F > minheap[now]->F){
@@ -108,22 +109,6 @@ void InsertNode(){
 	}
 }
 
-void Pophead(){
-	int now = 1;
-	int derived = now << 1; //*2
-	Swap(1, last--);
-	if(last!=0)
-		minheap[last]->k = 0;
-	while(derived <= last){
-		if (minheap[derived + 1]->F < minheap[derived]->F && derived < last) 
-			derived++;
-		if (minheap[now]->F <= minheap[derived]->F) 
-			break;
-		Swap(now, derived);
-		now = derived ;
-		derived <<= 1;
-	}
-}
 
 void minheapFilterUp(int k){
 	int parent;
@@ -199,14 +184,32 @@ void UpdateNode(int k){
 }
 
 int Find(Node *_n){
-/*	int return_index = -1;
+/*	int return_index = 0;
 	for(int i=1;i<=last;i++){
 		if((minheap[i]->x == _n->x) && (minheap[i]->y == _n->y))
 			return i;
 	}
-	return return_index;*/
-
+	return return_index;
+*/
 	return _n->k;
+}
+
+void Pophead(){
+	int now = 1;
+	int derived = now << 1; //*2
+	Swap(1, last--);
+	minheap[last+1]->k=0;
+	minheap[last+1]= NULL;
+	UpdateNode(1);
+	/*while(derived <= last){
+		if (minheap[derived + 1]->F < minheap[derived]->F && derived < last) 
+			derived++;
+		if (minheap[now]->F <= minheap[derived]->F) 
+			break;
+		Swap(now, derived);
+		now = derived ;
+		derived <<= 1;
+	}*/
 }
 /*}}}*/
 
@@ -219,7 +222,6 @@ int H(Node *_n, Node _e){
 int G(Node *_n, Node _s){
 	return std::abs(_n->x - _s.x) + std::abs(_n->y - _s.y);
 }
-
 /* judge function to update node cost and push in min heap
  * x and y means current node
  * from means from which direction to Node _n
@@ -227,25 +229,11 @@ int G(Node *_n, Node _s){
  * _cur means current route index
 */
 void Judge(int _x, int _y, short _from, int _cur){
-//		if(_x==55 && _y==27 && constraintx1==41 &&constraintx2==55 &&constrainty1==16 &&constrainty2==27){
-//			std::cout<<"b\n";
-//		}
-	
 	/*out of range*/
 	if(_x < 0 || _x >= gridY || _y < 0 || _y >= gridX)
 		return;
-	
-
-//	if(!(_x>=constraintx1 && _x<=constraintx2) || !(_y>=constrainty1 && _y<=constrainty2))
-//		return;
-	
-/*	if(Map[_x][_y]->step == -1){
-		std::pair<int,int>p;
-		p.first = _x;
-		p.second = _y;
-		initial.push_back(p);
-	}
-*/	
+	if(!(_x>=constraintx1 && _x<=constraintx2) || !(_y>=constrainty1 && _y<=constrainty2))
+		return;
 	int demand = 0;
 	if( _from == 0){
 		demand = Grid[_x][_y].up+1; 
@@ -262,7 +250,7 @@ void Judge(int _x, int _y, short _from, int _cur){
 	else{
 		demand = 0;
 	}
-	double C = std::pow(2 , (double)((double)(demand+1)/(double)capacity)) + 1;
+	double C = std::pow(2 , (double)((double)(demand+1)/(double)capacity)) - 1;
 	
 	int pseudoTurn;
 
@@ -280,12 +268,15 @@ void Judge(int _x, int _y, short _from, int _cur){
 	}
 
 
-	double pseudoF = (double)(H(Map[_x][_y] , routing_net[_cur].end) + G(Map[_x][_y], routing_net[_cur].start) + pseudoTurn )*C;
+//	double pseudoF = (double)((double)H(Map[_x][_y] , routing_net[_cur].end)  + best->F + (double)G(Map[_x][_y], routing_net[_cur].start) + pseudoTurn )*C;
+	//double pseudoF = (double)(best->F + (double)H(Map[_x][_y], routing_net[_cur].end)*0.5 + (double)pseudoTurn )*C;
+	double pseudoF = best->F + (double)C;
+	//double pseudoF = (double)(best->F + pseudoTurn )*C;
 
 
 
 	if( (Map[_x][_y]->F > pseudoF && Map[_x][_y]->step == (Map[best->x][best->y]->step +1 )) || (Map[_x][_y]->step > (Map[best->x][best->y]->step+1)) || Map[_x][_y]->step == -1 ){
-
+	//if( Map[_x][_y]->F > pseudoF || Map[_x][_y]->step == -1 ){
 		Map[_x][_y]->step = Map[best->x][best->y]->step+1;
 		Map[_x][_y]->parent =Map[best->x][best->y];
 		Map[_x][_y]->turn = pseudoTurn;
@@ -295,7 +286,7 @@ void Judge(int _x, int _y, short _from, int _cur){
 		if(value==0){
 			last++;
 			minheap[last] = Map[_x][_y]; 
-			minheap[last]->k = last; 
+			//minheap[last]->k = last; 
 			InsertNode();
 		}
 		else{
@@ -303,28 +294,20 @@ void Judge(int _x, int _y, short _from, int _cur){
 		}
 	}
 }
-
 void Astar(int _cur){
 	/* reset Map which store steps*/
-	/*for(int i=0;i<gridY;i++)
-		for(int j=0;j<gridX;j++){
+	for(int i=constraintx1; i<=constraintx2;i++){
+		for(int j=constrainty1; j<=constrainty2;j++){
 			Map[i][j]->step 	= -1;
 			Map[i][j]->F		=  0;
 			Map[i][j]->parent	= NULL;
 			Map[i][j]->turn		=  0;
 			Map[i][j]->k        =  0;
-		}*/
-	for(int p =0;p<initial.size();p++){
-		int i = initial[p].first;
-		int j = initial[p].second;
-		Map[i][j]->step 	= -1;
-		Map[i][j]->F		=  0;
-		Map[i][j]->parent	= NULL;
-		Map[i][j]->turn		=  0;
-		Map[i][j]->k        =  0;
+		}
 	}
-	initial.clear();
-	
+	for(int i=0;i<=last;i++){
+		minheap[i]=NULL;
+	}
 	last = 0;
 	//Judge(routing_net[_cur].start.x, routing_net[_cur].start.y, -1, _cur);
 	Map[routing_net[_cur].start.x][routing_net[_cur].start.y]->F = (double)(H(Map[routing_net[_cur].start.x][routing_net[_cur].start.y], routing_net[_cur].end) + G(Map[routing_net[_cur].start.x][routing_net[_cur].start.y], routing_net[_cur].start));
@@ -333,32 +316,23 @@ void Astar(int _cur){
 	last++;
 	minheap[last] = Map[routing_net[_cur].start.x][routing_net[_cur].start.y];
 	minheap[last]->k = last;
-		
-	std::pair<int,int>p;
-	p.first = minheap[last]->x;
-	p.second = minheap[last]->y;
-	initial.push_back(p);
 	InsertNode();
 
 
 	while (last > 0){
 		best = minheap[1];
-//		std::cout<<best->x<<", "<<best->y<<std::endl;
 		if(best->x == routing_net[_cur].end.x && best->y == routing_net[_cur].end.y)
 			break;
 		Pophead();
+
 		Judge(best->x+1, best->y,0, _cur); //up
 		Judge(best->x-1, best->y,1, _cur); //down
 		Judge(best->x, best->y+1,2, _cur); //left
 		Judge(best->x, best->y-1,3, _cur); //right
-		/*for(int i=1;i<=last;i++)
-			std::cout<<minheap[i]->F<<" ";
-		std::cout<<std::endl;*/
-	}
-	for(int i=constraintx1;i<=constraintx2;i++){
-		for(int j=constrainty1;j<=constrainty2;j++)
-			std::cout<<std::setw(3)<<Map[i][j]->step<<" ";
-		std::cout<<std::endl;
+/*		for(int i=1; i<=last;i++){
+			std::cout<<"("<<minheap[i]->x<<","<<minheap[i]->y<<") ";
+		}
+		std::cout<<std::endl;*/	
 	}
 
 	Node *t;
@@ -368,8 +342,6 @@ void Astar(int _cur){
 		routing_net[_cur].path.push_back(t);
 		pt =t;
 		t = t->parent;
-		//std::cout<<"("<<t->x<<","<<t->y<<")\n";
-		//std::cout<<"("<<pt->x<<","<<pt->y<<")\n";
 		if(pt->x - t->x ==1){
 			Grid[pt->x][pt->y].up +=1;
 			Grid[t->x][t->y].down +=1;
@@ -392,32 +364,9 @@ void Astar(int _cur){
 
 		if(t->x == routing_net[_cur].start.x && t->y == routing_net[_cur].start.y){
 			routing_net[_cur].path.push_back(t);
-	//		std::cout<<"("<<t->x<<","<<t->y<<")\n";
 			break;
 		}
 	}
-	/*
-	for(int i=0;i<gridY;i++)
-		for(int j=0;j<gridX;j++){
-			std::cout<<"["<<i<<","<<j<<"] -> "<<Map[i][j]->turn;
-			if(Map[i][j]->parent != NULL){
-				std::cout<<" : "<<Map[i][j]->parent->x <<" , "<< Map[i][j]->parent->y;
-			}
-			std::cout<<std::endl;
-
-		}
-	for(int i=0;i<gridY;i++){
-		for(int j=0;j<gridX;j++)
-			std::cout<<std::setw(3)<<Map[i][j]->step<<" ";
-		std::cout<<std::endl;
-	}*/
-	/*
-	for(int i=0;i<gridY;i++){
-		for(int j=0;j<gridX;j++)
-			std::cout<<std::setw(3)<<Map[i][j]->step<<" ";
-		std::cout<<std::endl;
-	}*/
-	//std::cout<<Map[routing_net[_cur].end.x][routing_net[_cur].end.y]->step<<std::endl;
 }
 
 
@@ -521,7 +470,7 @@ int main(int argc, char* argv[]){
 	std::sort(routing_net.begin(), routing_net.end(),cmpNet);
 	/* A* algorithm */
 	for(int i = 0; i < routing_net.size(); i++){
-/*		if(routing_net[i].start.x < routing_net[i].end.x){
+		if(routing_net[i].start.x < routing_net[i].end.x){
 			constraintx1 = routing_net[i].start.x;
 			constraintx2 = routing_net[i].end.x;
 		}
@@ -537,8 +486,8 @@ int main(int argc, char* argv[]){
 			constrainty2 = routing_net[i].start.y;
 			constrainty1 = routing_net[i].end.y;
 		}
-*/
-/*		int c = 1;
+/*constraint routing range  {{{*/
+		int c = 1;
 		while(true){
 			if((constraintx1 -c) >= 0){
 				constraintx1 -=c;
@@ -550,7 +499,7 @@ int main(int argc, char* argv[]){
 					break;
 			}
 		}
-		c = 1;
+		c =1;
 		while(true){
 			if((constraintx2 +c) < gridY){
 				constraintx2 +=c;
@@ -585,10 +534,9 @@ int main(int argc, char* argv[]){
 				if(c == 0)
 					break;
 			}
-		}*/
-		//		std::cout<<"----------------------------------------------\n";
-//		std::cout<<i<<std::endl;
-//		std::cout<<constraintx1<<","<<constraintx2<<","<<constrainty1<<","<<constrainty2<<std::endl;
+		}
+	/*}}}*/
+		//std::cout<<i<<std::endl;
 		Astar(i);
 	}
 	for(int i=0; i< num_net;i++){
@@ -598,9 +546,4 @@ int main(int argc, char* argv[]){
 		 	output << routing_net[i].path[j-1]->y<<" "<<(gridY -1 - routing_net[i].path[j-1]->x)<<std::endl;
 		}
 	}
-/*	for(int i=0;i<gridY;i++){
-		for(int j=0;j<gridX;j++){
-			std::cout<<"["<<i<<","<<j<<"] -> "<<Grid[i][j].up<<" , "<<Grid[i][j].down<<" , "<<Grid[i][j].left<<" , "<<Grid[i][j].right<<std::endl;
-		}
-	}*/
 }

@@ -1,5 +1,5 @@
 CC=g++
-LDFLAGS=-std=c++11 -g -lm
+LDFLAGS=-std=c++11 -O3 -lm
 SOURCES=routing.cpp
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=m10915113
