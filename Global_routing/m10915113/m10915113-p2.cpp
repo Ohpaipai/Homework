@@ -548,7 +548,7 @@ int main(int argc, char* argv[]){
 		
 		end = clock();
 		double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-		if(cpu_time_used >3450){ //3450 = 57.5min
+		if(cpu_time_used >3420){ //3420 = 57min
 			lshape=i;
 			break;
 		}
